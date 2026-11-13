@@ -174,7 +174,8 @@
   <div class="fret" style="margin-top:22px"></div>
 </div>
 
-<script type="text/plain" id="lexicon-csv">word,tags
+<script type="text/plain" id="lexicon-csv">
+word,tags
 我,PRON
 你,PRON
 他,PRON
@@ -231,7 +232,7 @@
 朵,MW
 双,MW
 对,MW|PREP
-岁,MW
+岁,SUI
 人,NOUN
 学生,NOUN
 老师,NOUN
@@ -418,7 +419,7 @@
 学,VT|VI
 是,SHI
 有,YOU
-没有,YOU|ADV
+没有,YOU|NEG2
 想,MODAL
 要,MODAL
 会,MODAL
@@ -427,8 +428,8 @@
 应该,MODAL
 打算,MODAL
 愿意,MODAL
-不,ADV
-没,ADV
+不,NEG0
+没,NEG1
 也,ADV
 都,ADV
 还,ADV
@@ -521,22 +522,41 @@
 啊,FP
 呀,FP
 和,CONJ
-但是,CONJ
-然后,CONJ
-因为,CONJ
-所以,CONJ
-而且,CONJ
-如果,CONJ
-虽然,CONJ</script>
+但是,CLCONJ
+然后,CLCONJ
+因为,CLCONJ
+所以,CLCONJ
+而且,CLCONJ
+如果,CLCONJ
+虽然,CLCONJ
+几,NUM
+过,EXP
+课,NOUN
+作业,NOUN
+考试,NOUN
+水果,NOUN
+蔬菜,NOUN
+早饭,NOUN
+午饭,NOUN
+晚饭,NOUN
+玩,VT|VI
+唱歌,VI
+跳舞,VI
+跑步,VI
+散步,VI
+开车,VI
+</script>
 <script id="grame-engine">
 'use strict';
 /* Grame 文法エンジン: 内蔵辞書(品詞タグ付き)+有限状態文法で判定する。
    コーパスの文そのものには縛られない。辞書に語を足せば語彙が増える。 */
 
 // ---------- 辞書: lexicon.csv (word,tags) を読む ----------
-// PRON 代詞 / DEM 指示 / NOUN 名詞 / TIME 時間詞 / NUM 数詞 / MW 量詞
+// PRON 代詞 / DEM 指示 / NOUN 名詞 / TIME 時間詞 / NUM 数詞 / MW 量詞 / SUI 岁
 // VT 他動詞 / VI 自動詞 / SHI 是 / YOU 有 / MODAL 助動詞 / ADV 副詞
-// PREP 介詞 / ADJ 形容詞 / DE 的 / LE 了 / FP 語気助詞 / CONJ 接続詞
+// NEG0 不 / NEG1 没 / NEG2 没有(動詞否定) / EXP 过
+// PREP 介詞 / ADJ 形容詞 / DE 的 / LE 了 / FP 語気助詞
+// CONJ 和(名詞並列) / CLCONJ 節接続詞(但是・所以など、完成後のみ)
 function parseLexicon(csv) {
   const lex = {};
   for (const line of String(csv).split(/\r?\n/)) {
@@ -582,10 +602,12 @@ function buildNP(P, outer, accepting, T) {
   put(P + 'NUM', 'MW', P + 'NUMM');
   put(P + 'NUMM', 'NOUN', P + 'OK');
   put(P + 'NUMM', 'ADJ', P + 'ADJ');
+  put(P + 'NUMM', 'SUI', P + 'OK');                 // 十岁的人 のような年齢修飾も名詞句に
   put(P + 'ADJ', 'NOUN', P + 'OK');
   put(P + 'ADJ', 'DE', P + 'DE');
   put(P + 'DE', 'NOUN', P + 'OK');
   put(P + 'DE', 'ADJ', P + 'ADJ');
+  put(P + 'DE', 'NUM', P + 'NUM');                  // 我的三本书
   put(P + 'OK', 'DE', P + 'DE');
   put(P + 'OK', 'CONJ', P + '0');                   // 和による並列
   for (const [tag, next] of Object.entries(outer)) { put(P + 'OK', tag, next); put(P + 'DE', tag, next); }
@@ -601,14 +623,16 @@ function buildTransitions() {
   };
   const copyInto = (dst, srcState) => { for (const [tag, n] of Object.entries(T[srcState] || {})) put(dst, tag, n); };
 
-  const completeOuter = { FP: ['FINAL'], LE: ['COMPLETE2'], CONJ: ['CLAUSE'], PREP: ['P0'] };
+  const completeOuter = { FP: ['FINAL'], LE: ['COMPLETE2'], CLCONJ: ['CLAUSE'], PREP: ['P0'] };
   const predOuter = {
     ADV: ['PRED'], MODAL: ['VZONE'],
+    NEG0: ['NEGP0'], NEG1: ['NEGP'], NEG2: ['PREDN'], NUM: ['AGE'],
     SHI: ['O0'], YOU: ['O0'],
     VT: ['VT'], VC: ['VC'], VI: ['VI'], ADJ: ['COMPLETE'],
   };
   const subjOuter = {
     TIME: ['SUBJ'], ADV: ['PRED'], MODAL: ['VZONE'],
+    NEG0: ['NEGP0'], NEG1: ['NEGP'], NEG2: ['PREDN'], NUM: ['AGE'],
     SHI: ['O0'], YOU: ['O0'], PREP: ['P0'],
     VT: ['VT'], VC: ['VC'], VI: ['VI'], ADJ: ['COMPLETE'],
   };
@@ -619,9 +643,26 @@ function buildTransitions() {
 
   // 文頭
   put('START', 'TIME', 'STARTT');
+  put('START', 'CLCONJ', 'CLAUSE');                 // 如果/虽然/所以 で始まる文も可
   copyInto('START', 'S0');
   copyInto('STARTT', 'S0');
   put('STARTT', 'TIME', 'STARTT');
+  // 否定の後: 不は是OK・有NG / 没は有OK・是NG(名詞目的語=欠落の対象) / 没有(動詞否定)は是・有ともNG
+  put('NEGP0', 'ADV', 'NEGP0'); put('NEGP0', 'MODAL', 'VZONE');
+  put('NEGP0', 'SHI', 'O0');
+  put('NEGP0', 'VT', 'VT'); put('NEGP0', 'VC', 'VC'); put('NEGP0', 'VI', 'VI'); put('NEGP0', 'ADJ', 'COMPLETE');
+  put('NEGP', 'ADV', 'NEGP'); put('NEGP', 'MODAL', 'VZONE');
+  put('NEGP', 'YOU', 'O0');
+  put('NEGP', 'VT', 'VT'); put('NEGP', 'VC', 'VC'); put('NEGP', 'VI', 'VI'); put('NEGP', 'ADJ', 'COMPLETE');
+  copyInto('NEGP', 'O0');                            // 我没钱 の「ない対象」
+  put('PREDN', 'ADV', 'PREDN'); put('PREDN', 'MODAL', 'VZONE');
+  put('PREDN', 'VT', 'VT'); put('PREDN', 'VC', 'VC'); put('PREDN', 'VI', 'VI'); put('PREDN', 'ADJ', 'COMPLETE');
+  // 年齢述語: 数詞 -> 岁 で完成
+  put('AGE', 'SUI', 'COMPLETE');
+  // 経験の「过」: 動詞の後ろで目的語も取れる
+  ACCEPTING.add('EXP');
+  copyInto('EXP', 'O0');
+  for (const [tag, n] of Object.entries(completeOuter)) put('EXP', tag, n);
   // 主語の後
   for (const [tag, n] of Object.entries(subjOuter)) put('SUBJ', tag, n);
   // 述語ゾーン(副詞・介詞句の後)
@@ -632,10 +673,12 @@ function buildTransitions() {
   put('VZONE', 'SHI', 'O0'); put('VZONE', 'ADV', 'VZONE');
   // 他動詞の後: 目的語か了。介詞句を挟むのも許可(緩め)
   put('VT', 'LE', 'COMPLETE');
+  put('VT', 'EXP', 'EXP');
   copyInto('VT', 'O0');
   put('VT', 'PREP', 'P0');
-  // 自動詞の後: 場所の目的語(去中国)や完成後の要素
-  copyInto('VI', 'O0');
+  // 自動詞の後: 場所の目的語(去中国。Pビルダー経由で連動文「去+場所+動詞」も可)や完成後の要素
+  put('VI', 'EXP', 'EXP');
+  copyInto('VI', 'P0');
   for (const [tag, n] of Object.entries(completeOuter)) put('VI', tag, n);
   // 節の接続後: 主語あり/なし両対応
   copyInto('CLAUSE', 'START');
@@ -660,6 +703,7 @@ function phaseName(states) {
   const s = [...states];
   if (s.some(x => x === 'START' || x === 'STARTT' || x.startsWith('S'))) return '主語（名詞句）';
   if (s.some(x => x === 'SUBJ' || x === 'PRED')) return '述語（動詞・形容詞・是など）';
+  if (s.some(x => x === 'NEGP0' || x === 'NEGP' || x === 'PREDN')) return '述語（動詞・形容詞）';
   if (s.some(x => x === 'VZONE')) return '動詞';
   if (s.some(x => x === 'VT' || x.startsWith('O'))) return '目的語（名詞句）';
   if (s.some(x => x.startsWith('P'))) return '介詞の目的語か述語';
@@ -749,7 +793,6 @@ function aiChoose(words) {
 const GrameEngine = { LEXICON, analyze, legalMoves, aiChoose };
 if (typeof module !== 'undefined' && module.exports) module.exports = GrameEngine;
 if (typeof window !== 'undefined') window.GrameEngine = GrameEngine;
-
 </script>
 <script>
 const $ = id => document.getElementById(id);
