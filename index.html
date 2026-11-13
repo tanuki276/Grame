@@ -89,18 +89,27 @@
     <details>
       <summary>AI設定（APIキー）</summary>
       <div class="settings">
+        <label>プロバイダ（プリセット）</label>
+        <select id="preset" style="width:100%;background:#0b111c;border:1px solid #33507a;border-radius:8px;color:#e8edf5;padding:10px 12px;font-size:15px">
+          <option value="groq" selected>Groq（無料枠・おすすめ）</option>
+          <option value="gemini">Gemini（無料枠）</option>
+          <option value="deepseek">DeepSeek（有料・激安）</option>
+          <option value="custom">カスタム</option>
+        </select>
         <label>エンドポイント（OpenAI互換）</label>
-        <input type="text" id="apiBase" value="https://api.deepseek.com">
+        <input type="text" id="apiBase" value="https://api.groq.com/openai/v1">
         <label>モデル</label>
-        <input type="text" id="apiModel" value="deepseek-flash">
+        <input type="text" id="apiModel" value="qwen/qwen3.8-27b">
         <label>APIキー（この端末のブラウザ内にだけ保存）</label>
         <input type="password" id="apiKey" placeholder="sk-...">
         <div class="row" style="margin-top:12px">
           <button id="saveKeyBtn" class="ghost">保存</button>
         </div>
         <div class="note" style="margin-top:8px">
-          キーを保存するとAI対戦モード（判定もAI）。キー未設定の場合は簡易モード：固定の文データで判定する練習用AIと対戦します。
-          DeepSeek / Qwen など中国語が強いモデルのキーがおすすめです。
+          キーを保存するとAI対戦モード（相手の手も文法判定もAI）。キー未設定の場合は簡易モード（固定文データで判定する練習用で、本対戦ではありません）。<br>
+          Groq：無料枠の目安は1日1,000リクエスト／200Kトークンで、このゲームなら1日25試合以上は回る計算。中国語の強い Qwen3.8 27B が無料枠にいます。<br>
+          Gemini：無料枠はモデルごとに1日20リクエスト程度という情報があり、数試合で上限に当たる可能性があります。<br>
+          キーは各プロバイダのサイトで無料発行できます（Groq は groq.com のコンソール）。
         </div>
       </div>
     </details>
@@ -355,6 +364,17 @@ function startGame() {
   if (!userTurn) aiTurn();
 }
 
+// ---------- プロバイダプリセット ----------
+const PRESETS = {
+  groq: { base: "https://api.groq.com/openai/v1", model: "qwen/qwen3.8-27b" },
+  gemini: { base: "https://generativelanguage.googleapis.com/v1beta/openai/", model: "gemini-4-hydrogen" },
+  deepseek: { base: "https://api.deepseek.com", model: "deepseek-flash" }
+};
+document.getElementById("preset").addEventListener("change", e => {
+  const p = PRESETS[e.target.value];
+  if (p) { $("apiBase").value = p.base; $("apiModel").value = p.model; }
+});
+
 // ---------- UI配線 ----------
 document.querySelectorAll("#orderRow .choice").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -385,6 +405,9 @@ $("saveKeyBtn").addEventListener("click", () => {
   const m = localStorage.getItem("cnb_api_model");
   if (b) $("apiBase").value = b;
   if (m) $("apiModel").value = m;
+  const curBase = $("apiBase").value.replace(/\/$/, "");
+  const match = Object.keys(PRESETS).find(k => PRESETS[k].base.replace(/\/$/, "") === curBase && PRESETS[k].model === $("apiModel").value);
+  $("preset").value = match || "custom";
   updateModeNote();
   render();
 })();
