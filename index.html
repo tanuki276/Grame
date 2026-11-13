@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>造句対戦 | AIと中国語の文を作る</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; background: #0e1420; color: #e8edf5; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 22px; margin: 8px 0 2px; }
+  .sub { color: #93a3bb; font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
+  .card { background: #16202f; border: 1px solid #263650; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 14px; margin: 0 0 10px; color: #aebbd2; letter-spacing: .05em; }
+  .sentence { font-size: 34px; min-height: 48px; letter-spacing: .08em; word-break: break-all; }
+  .sentence .placeholder { color: #54677f; font-size: 18px; }
+  .chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+  .chip { background: #1f2f47; border: 1px solid #33507a; padding: 4px 10px; border-radius: 999px; font-size: 16px; }
+  .chip.user { border-color: #3f7d4e; background: #1d2f24; }
+  .chip.ai { border-color: #7a5233; background: #2f241d; }
+  .arrow { color: #54677f; }
+  .turn { font-size: 14px; color: #ffd479; min-height: 20px; margin-top: 10px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type="text"], input[type="password"] { background: #0b111c; border: 1px solid #33507a; border-radius: 8px; color: #e8edf5; padding: 10px 12px; font-size: 17px; }
+  #wordInput { flex: 1; min-width: 160px; }
+  button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 15px; cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  button.ghost { background: #22314a; }
+  button.choice { background: #22314a; }
+  button.choice.selected { background: #2563eb; }
+  .log { font-size: 13px; line-height: 1.9; color: #b9c6da; max-height: 260px; overflow-y: auto; }
+  .log .bad { color: #ff8a8a; }
+  .log .good { color: #8affa8; }
+  .result { font-size: 20px; font-weight: bold; padding: 14px; border-radius: 10px; display: none; margin-bottom: 14px; text-align: center; }
+  .result.win { display: block; background: #14351f; border: 1px solid #3f7d4e; }
+  .result.lose { display: block; background: #3a1a1a; border: 1px solid #8a4444; }
+  label { font-size: 13px; color: #aebbd2; display: block; margin: 10px 0 4px; }
+  .settings input { width: 100%; }
+  .note { font-size: 12px; color: #7286a0; line-height: 1.7; }
+  details summary { cursor: pointer; color: #aebbd2; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>造句対戦</h1>
+  <div class="sub">
+    AIと交互に中国語の単語を1つずつ追加して、文を育てる対戦ゲーム。<br>
+    追加した単語で文法が破綻したら、<b>破綻させた側の負け</b>。文を完成させて相手が続けられなくなったら勝ち。
+  </div>
+
+  <div class="card">
+    <h2>対戦設定</h2>
+    <div class="row" id="orderRow">
+      <button class="choice selected" data-order="user">先行（あなたから）</button>
+      <button class="choice" data-order="ai">後攻（AIから）</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button id="startBtn">対戦開始</button>
+      <button id="resetBtn" class="ghost">リセット</button>
+    </div>
+    <div class="note" id="modeNote" style="margin-top:10px"></div>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <div class="card">
+    <h2>現在の文</h2>
+    <div class="sentence" id="sentence"><span class="placeholder">まだ何もない</span></div>
+    <div class="chain" id="chain"></div>
+    <div class="turn" id="turnInfo"></div>
+  </div>
+
+  <div class="card">
+    <h2>あなたの手番</h2>
+    <div class="row">
+      <input type="text" id="wordInput" placeholder="中国語の単語を1つ入力（例：学生）" autocomplete="off" lang="zh-CN">
+      <button id="playBtn">追加する</button>
+    </div>
+    <div class="note" style="margin-top:8px">1手 = 1単語。スペース・句読点は不可。例：我 → 是 → 学生 → 的 → …</div>
+  </div>
+
+  <div class="card">
+    <h2>進行ログ</h2>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>AI設定（APIキー）</summary>
+      <div class="settings">
+        <label>エンドポイント（OpenAI互換）</label>
+        <input type="text" id="apiBase" value="https://api.deepseek.com">
+        <label>モデル</label>
+        <input type="text" id="apiModel" value="deepseek-flash">
+        <label>APIキー（この端末のブラウザ内にだけ保存）</label>
+        <input type="password" id="apiKey" placeholder="sk-...">
+        <div class="row" style="margin-top:12px">
+          <button id="saveKeyBtn" class="ghost">保存</button>
+        </div>
+        <div class="note" style="margin-top:8px">
+          キーを保存するとAI対戦モード（判定もAI）。キー未設定の場合は簡易モード：固定の文データで判定する練習用AIと対戦します。
+          DeepSeek / Qwen など中国語が強いモデルのキーがおすすめです。
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+// ---------- 簡易モード用コーパス（単語列＝文） ----------
+const CORPUS = [
+  ["我","是","学生"],
+  ["我","是","中国","学生"],
+  ["我","是","学","中文","的","学生"],
+  ["我","是","日本人"],
+  ["我","是","你","的","学生"],
+  ["我","学","中文"],
+  ["我","学习","中文"],
+  ["我","喜欢","中文"],
+  ["我","喜欢","学","中文"],
+  ["我","喜欢","你"],
+  ["我","爱","你"],
+  ["我","爱","学","中文"],
+  ["我","想","学","中文"],
+  ["我","想","去","中国"],
+  ["我","今天","学","中文"],
+  ["我","明天","去","中国"],
+  ["我","去","中国","学","中文"],
+  ["我","有","一","只","猫"],
+  ["我","的","猫","很","可爱"],
+  ["你","是","学生"],
+  ["你","是","我","的","朋友"],
+  ["你","学","中文","吗"],
+  ["他","是","老师"],
+  ["他","学","中文","学","得","很","快"],
+  ["她","是","我","的","老师"],
+  ["我们","是","学生"],
+  ["我们","都","是","学生"],
+  ["我们","学","中文"],
+  ["猫","很","可爱"],
+  ["那","是","你","的","猫"],
+  ["这","是","我","的","书"],
+  ["中国","很","大"],
+  ["中文","很","难"],
+  ["今天","天气","很","好"]
+];
+
+function continuations(words) {
+  const next = new Set();
+  for (const s of CORPUS) {
+    if (s.length > words.length && words.every((w, i) => s[i] === w)) next.add(s[words.length]);
+  }
+  return [...next];
+}
+function isComplete(words) {
+  return CORPUS.some(s => s.length === words.length && words.every((w, i) => s[i] === w));
+}
+function offlineJudge(after) {
+  const cont = continuations(after);
+  const complete = isComplete(after);
+  const valid = complete || cont.length > 0;
+  return {
+    valid,
+    complete,
+    extendable: cont.length > 0,
+    reason: valid ? (complete && cont.length === 0 ? "文が完成し、自然な続きがない" : "文の途として成立") : "どの例文の途中にもならない（簡易判定）"
+  };
+}
+function offlineAiMove(words) {
+  const cands = continuations(words);
+  if (!cands.length) return null;
+  let best = null, bestScore = Infinity;
+  for (const c of cands) {
+    const after = [...words, c];
+    if (isComplete(after) && continuations(after).length === 0) return c; // 勝ち手
+    const score = continuations(after).length + Math.random() * 0.9;
+    if (score < bestScore) { bestScore = score; best = c; }
+  }
+  return best;
+}
+
+// ---------- APIモード ----------
+function apiConfig() {
+  return {
+    base: document.getElementById("apiBase").value.trim().replace(/\/$/, ""),
+    model: document.getElementById("apiModel").value.trim(),
+    key: localStorage.getItem("cnb_api_key") || ""
+  };
+}
+async function callLLM(system, user, temperature) {
+  const cfg = apiConfig();
+  const res = await fetch(cfg.base + "/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key },
+    body: JSON.stringify({
+      model: cfg.model,
+      temperature,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user }
+      ]
+    })
+  });
+  if (!res.ok) throw new Error("API error: " + res.status);
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+function parseJsonLoose(text) {
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error("JSON not found in model output");
+  return JSON.parse(m[0]);
+}
+const JUDGE_SYSTEM = "You are a strict judge of a Chinese sentence-building game. Two players alternately append ONE Chinese word to a growing sequence. Judge ONLY with JSON: {\"valid\": boolean, \"complete\": boolean, \"extendable\": boolean, \"reason\": \"short explanation in Japanese\"}. valid = the resulting sequence can still be the beginning of a grammatically correct Chinese sentence (being incomplete is fine). complete = the sequence alone is already a complete grammatical sentence. extendable = a native speaker could naturally append another word to continue the same sentence. Be strict: a sequence that no grammatical sentence can start with is invalid.";
+async function apiJudge(after) {
+  const out = await callLLM(JUDGE_SYSTEM,
+    "Sequence after the move (words separated by /): " + after.join("/") +
+    "\nFull string: " + after.join(""), 0);
+  const j = parseJsonLoose(out);
+  return { valid: !!j.valid, complete: !!j.complete, extendable: !!j.extendable, reason: String(j.reason || "") };
+}
+const MOVE_SYSTEM = "You play a Chinese sentence-building game. Given the current word sequence, append exactly ONE Chinese word. Rules: your word must keep the sequence a valid beginning of a grammatical Chinese sentence. Strategy: prefer words that leave the opponent few safe continuations; if you can complete the sentence so it cannot be naturally extended, do it and win. Reply ONLY with JSON: {\"word\": \"...\"}";
+async function apiAiMove(words) {
+  const out = await callLLM(MOVE_SYSTEM,
+    "Current sequence (words separated by /): " + (words.length ? words.join("/") : "(empty, you open the sentence)") +
+    "\nCurrent string: " + words.join(""), 0.7);
+  const j = parseJsonLoose(out);
+  return String(j.word || "").trim();
+}
+
+// ---------- ゲーム状態 ----------
+let words = [];
+let owners = []; // 'user' | 'ai'
+let order = "user";
+let gameActive = false;
+let busy = false;
+let userTurn = true;
+
+const $ = id => document.getElementById(id);
+const logEl = $("log");
+
+function log(text, cls) {
+  const div = document.createElement("div");
+  if (cls) div.className = cls;
+  div.textContent = text;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+function currentMode() { return apiConfig().key ? "api" : "offline"; }
+function updateModeNote() {
+  $("modeNote").textContent = currentMode() === "api"
+    ? "モード：AI対戦（API判定）"
+    : "モード：簡易（キー未設定。固定文データで判定する練習モード）";
+}
+function render() {
+  const s = $("sentence");
+  if (words.length) { s.textContent = words.join(""); }
+  else { s.innerHTML = '<span class="placeholder">まだ何もない</span>'; }
+  const chain = $("chain");
+  chain.innerHTML = "";
+  words.forEach((w, i) => {
+    if (i > 0) {
+      const a = document.createElement("span");
+      a.className = "arrow"; a.textContent = "→";
+      chain.appendChild(a);
+    }
+    const c = document.createElement("span");
+    c.className = "chip " + owners[i];
+    c.textContent = w;
+    chain.appendChild(c);
+  });
+  $("turnInfo").textContent = !gameActive ? "" :
+    (busy ? "判定中…" : (userTurn ? "あなたの番です" : "AIの番です"));
+  $("playBtn").disabled = !gameActive || busy || !userTurn;
+  $("wordInput").disabled = !gameActive || busy || !userTurn;
+}
+function endGame(userWon, text) {
+  gameActive = false;
+  const r = $("result");
+  r.className = "result " + (userWon ? "win" : "lose");
+  r.textContent = (userWon ? "🏆 あなたの勝ち　" : "💥 あなたの負け　") + text;
+  log(text, userWon ? "good" : "bad");
+  render();
+}
+async function judge(after) {
+  return currentMode() === "api" ? apiJudge(after) : offlineJudge(after);
+}
+async function applyMove(word, byUser) {
+  const after = [...words, word];
+  let j;
+  try {
+    j = await judge(after);
+  } catch (e) {
+    log("判定エラー: " + e.message, "bad");
+    return false;
+  }
+  const who = byUser ? "あなた" : "AI";
+  if (!j.valid) {
+    words = after; owners.push(byUser ? "user" : "ai"); render();
+    log(who + " の「" + word + "」で破綻：" + j.reason, "bad");
+    endGame(!byUser, "「" + after.join("") + "」は文法的に続けられない。" + who + "が破綻させたので負け。理由：" + j.reason);
+    return true;
+  }
+  words = after; owners.push(byUser ? "user" : "ai");
+  log(who + " → " + word + "（" + j.reason + "）");
+  if (j.complete && !j.extendable) {
+    endGame(byUser, "「" + after.join("") + "」が完成し、自然な続きがない。" + who + "の勝ち。");
+    return true;
+  }
+  return true;
+}
+async function aiTurn() {
+  busy = true; render();
+  try {
+    let word = null;
+    if (currentMode() === "api") word = await apiAiMove(words);
+    else word = offlineAiMove(words);
+    if (!word) { endGame(true, "AIに打てる手がない。"); return; }
+    await applyMove(word, false);
+  } catch (e) {
+    log("AIエラー: " + e.message, "bad");
+  } finally {
+    busy = false;
+    if (gameActive) { userTurn = true; }
+    render();
+  }
+}
+async function userPlay() {
+  const input = $("wordInput");
+  const word = input.value.trim();
+  if (!word) return;
+  if (/[\s。．、,!！?？・…「」""'']/u.test(word) || !/^[\u4e00-\u9fff]+$/u.test(word) || [...word].length > 5) {
+    log("入力エラー：漢字だけの1単語（5文字まで）で入力してください", "bad");
+    return;
+  }
+  input.value = "";
+  busy = true; render();
+  const ok = await applyMove(word, true);
+  busy = false;
+  if (gameActive && ok) {
+    userTurn = false; render();
+    await aiTurn();
+  }
+  render();
+}
+function startGame() {
+  words = []; owners = []; gameActive = true; busy = false;
+  $("result").className = "result"; $("result").textContent = "";
+  logEl.innerHTML = "";
+  userTurn = order === "user";
+  log("対戦開始。" + (order === "user" ? "あなたが先行。" : "AIが先行。"));
+  render();
+  if (!userTurn) aiTurn();
+}
+
+// ---------- UI配線 ----------
+document.querySelectorAll("#orderRow .choice").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#orderRow .choice").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    order = btn.dataset.order;
+  });
+});
+$("startBtn").addEventListener("click", startGame);
+$("resetBtn").addEventListener("click", () => {
+  words = []; owners = []; gameActive = false;
+  $("result").className = "result"; $("result").textContent = "";
+  logEl.innerHTML = ""; render();
+});
+$("playBtn").addEventListener("click", userPlay);
+$("wordInput").addEventListener("keydown", e => { if (e.key === "Enter") userPlay(); });
+$("saveKeyBtn").addEventListener("click", () => {
+  const k = $("apiKey").value.trim();
+  if (k) localStorage.setItem("cnb_api_key", k);
+  else localStorage.removeItem("cnb_api_key");
+  localStorage.setItem("cnb_api_base", $("apiBase").value.trim());
+  localStorage.setItem("cnb_api_model", $("apiModel").value.trim());
+  updateModeNote();
+  log("AI設定を保存しました");
+});
+(function init() {
+  const b = localStorage.getItem("cnb_api_base");
+  const m = localStorage.getItem("cnb_api_model");
+  if (b) $("apiBase").value = b;
+  if (m) $("apiModel").value = m;
+  updateModeNote();
+  render();
+})();
+</script>
+</body>
+</html>
