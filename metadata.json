@@ -1,0 +1,6 @@
+{
+  "name": "造句対戦",
+  "description": "AIと交互に1単語ずつ中国語の文を組み上げる対戦ゲーム",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -10,10 +10,11 @@
   :root{
     --primary:#b3261e; --on-primary:#ffffff; --primary-container:#f9dedc; --on-primary-container:#410e0b;
     --secondary:#8c6a00; --secondary-container:#ffe08a; --on-secondary-container:#4a3800;
-    --tertiary:#2b4c9b; --tertiary-container:#dbe4ff;
+    --tertiary:#2b4c9b; --tertiary-container:#dbe4ff; --on-tertiary-container:#0d1f4d;
     --bg:#f6f1e7; --surface:#fffdf6; --surface-2:#efe7d6; --surface-3:#e7dcc4;
     --on-surface:#221d15; --on-variant:#5c5344; --outline:#cbbfa5; --outline-2:#e0d5bd;
-    --error:#ba1a1a; --error-container:#ffdad6;
+    --error:#ba1a1a; --error-container:#ffdad6; --on-error-container:#410002;
+    --success:#1e6b3a; --success-container:#d7f5e1;
     --gold:#c9a227;
     --shadow:0 1px 2px rgba(60,40,10,.08),0 4px 14px rgba(60,40,10,.07);
   }
@@ -21,10 +22,11 @@
     :root{
       --primary:#ff8a75; --on-primary:#5f1309; --primary-container:#7e2a22; --on-primary-container:#ffdad3;
       --secondary:#e3c04c; --secondary-container:#574500; --on-secondary-container:#ffe58a;
-      --tertiary:#aec4ff; --tertiary-container:#22386e;
+      --tertiary:#aec4ff; --tertiary-container:#22386e; --on-tertiary-container:#dbe4ff;
       --bg:#16120c; --surface:#211b12; --surface-2:#2b2417; --surface-3:#372e1d;
       --on-surface:#ece2cd; --on-variant:#c9bda3; --outline:#6f6350; --outline-2:#453b2a;
-      --error:#ffb4ab; --error-container:#93000a;
+      --error:#ffb4ab; --error-container:#93000a; --on-error-container:#ffdad6;
+      --success:#89db9f; --success-container:#144425;
       --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.35);
     }
   }
@@ -35,12 +37,15 @@
     background-image:radial-gradient(ellipse at 20% -10%, rgba(201,162,39,.14), transparent 55%),radial-gradient(ellipse at 90% 0%, rgba(179,38,30,.10), transparent 50%);
     min-height:100vh;
   }
-  .wrap{max-width:680px; margin:0 auto; padding:20px 16px 56px}
+  .wrap{max-width:720px; margin:0 auto; padding:18px 16px 64px}
   /* 回纹 (fret) pattern strip */
-  .fret{height:14px; opacity:.55; border-radius:4px;
+  .fret{
+    height:14px; opacity:.55; border-radius:4px;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M2 12 V4 h8 v6 H5' fill='none' stroke='%23b3261e' stroke-width='1.6'/%3E%3Cpath d='M16 12 V4 h8 v6 h-5' fill='none' stroke='%23c9a227' stroke-width='1.6'/%3E%3C/svg%3E");
-    background-repeat:repeat-x; background-size:28px 14px;}
-  header{display:flex; align-items:center; gap:14px; margin:18px 2px 6px}
+    background-repeat:repeat-x; background-size:28px 14px;
+  }
+  header{display:flex; align-items:center; justify-content:space-between; gap:14px; margin:18px 2px 6px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:14px}
   .seal{
     width:56px; height:56px; flex:0 0 auto; border-radius:12px; transform:rotate(-3deg);
     background:linear-gradient(145deg,#c62f24,#9c1f16); color:#fff;
@@ -51,145 +56,288 @@
   h1{font-family:"Noto Serif SC",serif; font-weight:900; font-size:27px; margin:0; letter-spacing:.06em}
   h1 .accent{color:var(--primary)}
   .subtitle{margin:2px 0 0; font-size:13px; color:var(--on-variant)}
+  .stats-pill{
+    display:inline-flex; align-items:center; gap:10px; padding:7px 14px; border-radius:999px;
+    background:var(--surface); border:1px solid var(--outline-2); font-size:12px; font-weight:700;
+    color:var(--on-variant); box-shadow:var(--shadow);
+  }
+  .stats-pill b{color:var(--on-surface)}
   .card{
-    background:var(--surface); border:1px solid var(--outline-2); border-radius:28px;
+    background:var(--surface); border:1px solid var(--outline-2); border-radius:26px;
     padding:20px; margin-top:16px; box-shadow:var(--shadow);
   }
-  .card h2{font-size:13px; font-weight:700; letter-spacing:.14em; color:var(--on-variant); margin:0 0 12px; text-transform:uppercase}
-  label.flabel{display:block; font-size:12px; font-weight:500; color:var(--on-variant); margin:14px 0 6px}
+  .card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; flex-wrap:wrap}
+  .card h2{font-size:12.5px; font-weight:700; letter-spacing:.14em; color:var(--on-variant); margin:0; text-transform:uppercase}
+  label.flabel{display:block; font-size:12px; font-weight:700; color:var(--on-variant); margin:14px 0 6px}
   label.flabel:first-of-type{margin-top:0}
-  input[type=text], input[type=password], select{
-    width:100%; padding:13px 16px; font-size:15px; color:var(--on-surface);
+  input[type=text], input[type=search], select{
+    width:100%; padding:12px 15px; font-size:15px; color:var(--on-surface);
     background:var(--surface); border:1.5px solid var(--outline); border-radius:14px; outline:none;
     font-family:inherit; transition:border-color .15s, box-shadow .15s;
   }
   input:focus, select:focus{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-container)}
   button{
     font-family:inherit; font-weight:700; border:none; cursor:pointer; border-radius:999px;
-    padding:12px 24px; font-size:15px; transition:filter .15s, transform .05s;
+    padding:11px 22px; font-size:14.5px; transition:filter .15s, transform .05s, background-color .15s;
   }
-  button:active{transform:scale(.97)}
+  button:active:not(:disabled){transform:scale(.97)}
   button:disabled{opacity:.45; cursor:not-allowed}
   .btn-filled{background:var(--primary); color:var(--on-primary); box-shadow:var(--shadow)}
-  .btn-filled:hover{filter:brightness(1.08)}
+  .btn-filled:hover:not(:disabled){filter:brightness(1.08)}
   .btn-tonal{background:var(--primary-container); color:var(--on-primary-container)}
   .btn-gold{background:var(--secondary-container); color:var(--on-secondary-container)}
-  .btn-text{background:transparent; color:var(--primary); padding:10px 14px}
+  .btn-outline{background:transparent; color:var(--on-surface); border:1.5px solid var(--outline); padding:8px 14px; font-size:13px}
+  .btn-text{background:transparent; color:var(--primary); padding:9px 14px; font-size:13.5px}
+  .btn-sm{padding:6px 12px; font-size:12px}
   .seg{display:flex; background:var(--surface-2); border-radius:999px; padding:4px; gap:4px}
-  .seg button{flex:1; background:transparent; color:var(--on-variant); padding:9px 8px; font-size:14px; box-shadow:none}
+  .seg button{flex:1; background:transparent; color:var(--on-variant); padding:9px 8px; font-size:13.5px; box-shadow:none}
   .seg button.on{background:var(--surface); color:var(--primary); box-shadow:var(--shadow)}
-  .note{font-size:12.5px; color:var(--on-variant); line-height:1.7; margin-top:12px}
+  .note{font-size:12.5px; color:var(--on-variant); line-height:1.7; margin:12px 0 0}
   .modechip{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; background:var(--tertiary-container); color:var(--tertiary)}
   .modechip.local{background:var(--secondary-container); color:var(--on-secondary-container)}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; padding:10px 14px; border-radius:14px; background:var(--surface-2); font-size:13px; cursor:pointer}
+  .toggle-row input{width:18px; height:18px; accent-color:var(--primary); cursor:pointer}
+
   /* sentence tiles */
-  .sentence{display:flex; flex-wrap:wrap; gap:8px; min-height:64px; align-items:center; padding:6px 2px}
+  .sentence{
+    display:flex; flex-wrap:wrap; gap:10px 8px; min-height:76px; align-items:center;
+    padding:12px; border-radius:18px; background:var(--surface-2); border:1px dashed var(--outline);
+  }
   .tile{
-    position:relative; min-width:52px; padding:12px 10px 9px; text-align:center;
+    position:relative; min-width:52px; padding:12px 11px 8px; text-align:center;
     background:linear-gradient(160deg,var(--surface) 60%,var(--surface-2));
     border:1.5px solid var(--outline); border-radius:14px; box-shadow:var(--shadow);
     animation:pop .18s ease-out;
   }
   .tile .w{font-size:23px; font-weight:700; line-height:1.15}
+  .tile .tag{font-size:10px; color:var(--on-variant); margin-top:2px}
   .tile .who{position:absolute; top:-8px; right:-6px; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px}
   .tile.you{border-color:var(--tertiary)} .tile.you .who{background:var(--tertiary); color:#fff}
   .tile.ai{border-color:var(--primary)} .tile.ai .who{background:var(--primary); color:#fff}
   @media (prefers-color-scheme: dark){ .tile.you .who{color:#0d1b3e} .tile.ai .who{color:#3d0a04} }
   @keyframes pop{from{transform:scale(.6); opacity:0} to{transform:scale(1); opacity:1}}
-  .empty-hint{color:var(--on-variant); font-size:14px}
-  .turnbar{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  .empty-hint{color:var(--on-variant); font-size:13.5px}
+
+  .turnbar{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; flex-wrap:wrap}
+  .turn-left{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
   .turnchip{font-size:12.5px; font-weight:700; padding:6px 14px; border-radius:999px; background:var(--primary-container); color:var(--on-primary-container)}
   .turnchip.ai{background:var(--surface-3); color:var(--on-surface)}
-  .slot-hint{font-size:12.5px; color:var(--secondary); font-weight:700}
+  .state-pill{font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--surface-2); color:var(--on-variant)}
+  .state-pill.complete{background:var(--success-container); color:var(--success)}
+  .slot-hint{font-size:12.5px; color:var(--secondary); font-weight:700; margin:8px 2px 0}
+
   .playrow{display:flex; gap:10px; margin-top:12px}
-  .playrow input{flex:1; font-size:19px; text-align:center; letter-spacing:.1em}
-  .result{border-radius:20px; padding:16px 18px; font-size:16.5px; font-weight:700; line-height:1.6; margin-top:14px; display:none}
+  .playrow input{flex:1; font-size:19px; text-align:center; letter-spacing:.08em}
+
+  .inline-err{
+    margin-top:10px; padding:10px 14px; border-radius:12px; font-size:13px; font-weight:600;
+    background:var(--error-container); color:var(--on-error-container);
+    display:none; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .inline-err.show{display:flex}
+
+  /* Candidate assist panel */
+  .assist-box{
+    margin-top:14px; padding:12px; border-radius:18px;
+    background:var(--surface-2); border:1px solid var(--outline-2);
+  }
+  .assist-top{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap}
+  .assist-title{font-size:12px; font-weight:700; color:var(--on-variant)}
+  .cat-tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; scrollbar-width:thin}
+  .cat-tab{
+    flex:0 0 auto; padding:5px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
+    background:var(--surface); color:var(--on-variant); border:1px solid var(--outline-2);
+  }
+  .cat-tab.on{background:var(--tertiary-container); color:var(--on-tertiary-container); border-color:var(--tertiary)}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; max-height:150px; overflow-y:auto; padding-top:4px}
+  .chip{
+    padding:6px 12px; border-radius:12px; font-size:14px; font-weight:700;
+    background:var(--surface); color:var(--on-surface); border:1px solid var(--outline);
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .chip:hover:not(:disabled){border-color:var(--primary); color:var(--primary)}
+  .chip.win-chip{border-color:var(--gold); background:var(--secondary-container); color:var(--on-secondary-container)}
+
+  .result{border-radius:20px; padding:16px 18px; font-size:15.5px; font-weight:700; line-height:1.65; margin-top:14px; display:none}
   .result.win{display:block; background:var(--secondary-container); color:var(--on-secondary-container)}
   .result.lose{display:block; background:var(--error-container); color:var(--error)}
-  .log{max-height:230px; overflow-y:auto; display:flex; flex-direction:column; gap:2px}
+  .result .final-sentence{display:block; margin-top:6px; font-size:20px; font-family:"Noto Serif SC",serif; color:var(--on-surface)}
+
+  .log{max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:3px}
   .log div{font-size:13px; line-height:1.65; padding:7px 12px; border-radius:10px; color:var(--on-variant)}
   .log div:nth-child(odd){background:var(--surface-2)}
   .log b{color:var(--on-surface)}
-  details.card summary{cursor:pointer; font-weight:700; font-size:15px; list-style:none; display:flex; justify-content:space-between; align-items:center}
+
+  details.card summary{cursor:pointer; font-weight:700; font-size:14.5px; list-style:none; display:flex; justify-content:space-between; align-items:center}
   details.card summary::-webkit-details-marker{display:none}
-  .row-btns{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap}
-  .hidden{display:none}
+  .row-btns{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; align-items:center}
+  .hidden{display:none !important}
+
+  /* Dictionary modal */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(15,10,5,.55); z-index:50;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .modal{
+    width:100%; max-width:640px; max-height:84vh; display:flex; flex-direction:column;
+    background:var(--surface); border:1px solid var(--outline); border-radius:24px;
+    padding:20px; box-shadow:0 16px 48px rgba(0,0,0,.28);
+  }
+  .modal-body{overflow-y:auto; margin-top:12px; display:flex; flex-direction:column; gap:14px}
+  .dict-group h3{margin:0 0 8px; font-size:12.5px; color:var(--on-variant); letter-spacing:.08em}
+  .dict-words{display:flex; flex-wrap:wrap; gap:6px}
+  .examples{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
+  .ex-pill{font-size:12px; padding:4px 10px; border-radius:999px; background:var(--surface-2); color:var(--on-variant)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="fret"></div>
   <header>
-    <div class="seal">造</div>
-    <div>
-      <h1>造句<span class="accent">対戦</span></h1>
-      <p class="subtitle">AIと交互に1単語ずつ、中国語の文を組み上げる対戦ゲーム</p>
+    <div class="brand">
+      <div class="seal">造</div>
+      <div>
+        <h1>造句<span class="accent">対戦</span></h1>
+        <p class="subtitle">AIと交互に1単語ずつ、中国語の文を組み上げる対戦ゲーム</p>
+      </div>
+    </div>
+    <div class="stats-pill" id="statsPill">
+      <span>勝 <b id="statWin">0</b></span>
+      <span>敗 <b id="statLoss">0</b></span>
+      <span>連勝 <b id="statStreak">0</b></span>
     </div>
   </header>
 
   <div class="card" id="setupCard">
-    <h2>対戦設定</h2>
+    <div class="card-head">
+      <h2>対戦設定</h2>
+      <button type="button" class="btn-outline btn-sm" id="openDictSetupBtn">辞書を見る（<span id="lexCountSpan">---</span>語）</button>
+    </div>
+
+    <label class="flabel">手番</label>
     <div class="seg" id="orderSeg">
       <button type="button" data-order="first" class="on">先行（あなたから）</button>
       <button type="button" data-order="second">後攻（AIから）</button>
     </div>
+
+    <label class="flabel">判定モード</label>
+    <div class="seg" id="modeSeg">
+      <button type="button" data-mode="local" class="on">文法モード（オフライン）</button>
+      <button type="button" data-mode="ai" id="aiModeSegBtn" disabled>AI対戦モード（未設定）</button>
+    </div>
+
+    <label class="toggle-row">
+      <span>文法モードで入力候補ヒントを表示する（タップ入力可）</span>
+      <input type="checkbox" id="assistToggle" checked>
+    </label>
+
     <div class="row-btns">
       <button class="btn-filled" id="startBtn">対戦開始</button>
       <span class="modechip local" id="modeChip">文法モード（オフライン判定）</span>
     </div>
-    <p class="note">ルール：交互に文末へ1単語を追加。自分の手で文法が破綻したら負け。文を完成させて相手が続けられなくなったら勝ち。<br>
-    判定は2通り。既定は<b>文法モード</b>：CSV辞書（約350語）と文法ルールで判定するので、決まった例文に縛られず語彙の範囲で自由に作れる。サーバーの環境変数にAPIキーが設定されていれば<b>AI対戦モード</b>：判定も相手の手もAIが担う。</p>
+
+    <p class="note">
+      <b>ルール：</b>交互に文末へ1単語を追加します。自分の手で文法や意味（主語の有生性・動詞の目的語クラス・否定「不/没」・程度副詞など）が破綻したら負け。文を完成させて相手が続けられなくなったら勝ちです。
+    </p>
+    <div class="examples">
+      <span class="ex-pill">例：我 → 是 → 学生 → 的 → 老师</span>
+      <span class="ex-pill">例：我 → 昨天 → 在 → 学校 → 吃 → 苹果 → 了</span>
+      <span class="ex-pill">例：他 → 比 → 我 → 更 → 聪明</span>
+    </div>
   </div>
 
   <div class="card hidden" id="gameCard">
     <div class="turnbar">
-      <span class="turnchip" id="turnChip">あなたの番</span>
-      <span class="slot-hint" id="slotHint"></span>
+      <div class="turn-left">
+        <span class="turnchip" id="turnChip">あなたの番</span>
+        <span class="state-pill" id="sentenceStatePill">文頭</span>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center">
+        <button type="button" class="btn-outline btn-sm" id="copyBtn">コピー</button>
+        <button type="button" class="btn-outline btn-sm" id="openDictGameBtn">辞書</button>
+      </div>
     </div>
+
     <div class="sentence" id="sentence"><span class="empty-hint">最初の1単語を入力してください</span></div>
+    <div class="slot-hint" id="slotHint"></div>
+
     <div class="playrow" id="playRow">
       <input type="text" id="wordInput" placeholder="1単語（例：我）" maxlength="6" autocomplete="off">
       <button class="btn-filled" id="playBtn">追加する</button>
     </div>
+
+    <div class="inline-err" id="inlineErr">
+      <span id="inlineErrMsg"></span>
+      <button type="button" class="btn-outline btn-sm hidden" id="retryAiBtn">再試行</button>
+    </div>
+
+    <div class="assist-box hidden" id="assistBox">
+      <div class="assist-top">
+        <span class="assist-title" id="assistTitle">入力できる候補語</span>
+        <input type="search" id="assistSearch" placeholder="候補を絞り込み…" style="width:160px; padding:5px 10px; font-size:12px; border-radius:999px">
+      </div>
+      <div class="cat-tabs" id="assistTabs"></div>
+      <div class="chips" id="assistChips"></div>
+    </div>
+
     <div class="result" id="resultBox"></div>
     <div class="row-btns">
       <button class="btn-tonal hidden" id="againBtn">もう一試合</button>
+      <button class="btn-outline hidden" id="backSetupBtn">設定に戻る</button>
       <button class="btn-text" id="giveupBtn">投了する</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>進行ログ</h2>
+    <div class="card-head">
+      <h2>進行ログ</h2>
+      <button type="button" class="btn-text btn-sm" id="clearLogBtn">ログ消去</button>
+    </div>
     <div class="log" id="log"><div>まだ対戦が始まっていません。</div></div>
   </div>
 
   <details class="card">
-    <summary>AI設定（環境変数）<span>▾</span></summary>
+    <summary>AI設定・システム情報<span>▾</span></summary>
     <p class="note" id="envStatus">状態を確認中…</p>
-    <p class="note">AI対戦モードのAPIキーはブラウザには置かず、サーバーの<b>環境変数</b>で管理します（Vercel の Project → Settings → Environment Variables）。<br>
-    ・<b>GRAME_API_KEY</b>（必須）：Groq などの OpenAI 互換 API キー。Groq は groq.com のコンソールで無料発行でき、無料枠の目安は1日1,000リクエスト／200Kトークン（このゲームなら1日25試合以上）。<br>
-    ・<b>GRAME_API_BASE</b>（任意）：既定は Groq のエンドポイント。<br>
-    ・<b>GRAME_MODEL</b>（任意）：既定は qwen/qwen3.8-27b。<br>
-    環境変数を設定したら Vercel で再デプロイすると有効になります。未設定の間は文法モード（CSV辞書＋文法ルールで判定するオフライン対戦）で動作します。</p>
+    <p class="note">
+      AI対戦モードのAPIキーはブラウザには置かず、サーバーの<b>環境変数</b>で管理します（Vercel の Project → Settings → Environment Variables）。<br>
+      ・<b>GRAME_API_KEY</b>（必須）：Groq などの OpenAI 互換 API キー。<br>
+      ・<b>GRAME_API_BASE</b>（任意）：既定は Groq のエンドポイント。<br>
+      ・<b>GRAME_MODEL</b>（任意）：既定は <code>qwen/qwen3.8-27b</code>。<br>
+      未設定の間は文法モード（CSV辞書＋NFA文法エンジンによるオフライン対戦）で動作します。
+    </p>
   </details>
   <div class="fret" style="margin-top:22px"></div>
 </div>
 
+<!-- Dictionary Modal -->
+<div class="modal-backdrop hidden" id="dictModal" role="dialog" aria-modal="true" aria-labelledby="dictTitle">
+  <div class="modal">
+    <div class="card-head" style="margin-bottom:8px">
+      <h2 id="dictTitle" style="font-size:15px; letter-spacing:.06em; color:var(--on-surface)">収録語彙辞書（<span id="dictCount">0</span>語）</h2>
+      <button type="button" class="btn-outline btn-sm" id="closeDictBtn">閉じる</button>
+    </div>
+    <input type="search" id="dictSearch" placeholder="漢字または品詞で検索（例：吃、NOUN、PLACE）">
+    <div class="modal-body" id="dictBody"></div>
+  </div>
+</div>
+
 <script type="text/plain" id="lexicon-csv">
 word,tags,sem
-我,PRON,
-你,PRON,
-他,PRON,
-她,PRON,
-它,PRON,
-我们,PRON,
-你们,PRON,
-他们,PRON,
-谁,PRON,
-自己,PRON,
-大家,PRON,
-这,PRON|DEM,
-那,PRON|DEM,
-什么,PRON|DEM,
+我,PRON,ANIMATE
+你,PRON,ANIMATE
+他,PRON,ANIMATE
+她,PRON,ANIMATE
+它,PRON,ANIMATE
+我们,PRON,ANIMATE
+你们,PRON,ANIMATE
+他们,PRON,ANIMATE
+谁,PRON,ANIMATE
+自己,PRON,ANIMATE
+大家,PRON,ANIMATE
+这,DEM,
+那,DEM,
+什么,QPRON|DEM,
 今天,TIME,
 明天,TIME,
 昨天,TIME,
@@ -204,6 +352,9 @@ word,tags,sem
 去年,TIME,
 周末,TIME,
 平时,TIME,
+刚才,TIME,
+以后,TIME,
+以前,TIME,
 一,NUM,
 二,NUM,
 三,NUM,
@@ -217,6 +368,7 @@ word,tags,sem
 两,NUM,
 百,NUM,
 千,NUM,
+几,NUM,
 个,MW,
 只,MW,
 本,MW,
@@ -231,7 +383,7 @@ word,tags,sem
 些,MW,
 朵,MW,
 双,MW,
-对,MW|PREP,
+对,MW|PREP_REL,
 岁,SUI,
 人,NOUN,ANIMATE
 学生,NOUN,ANIMATE
@@ -263,6 +415,9 @@ word,tags,sem
 本子,NOUN,THING
 笔,NOUN,THING
 纸,NOUN,THING
+报纸,NOUN,MEDIA|THING
+杂志,NOUN,MEDIA|THING
+故事,NOUN,MEDIA|ABSTRACT
 手机,NOUN,THING|MEDIA|COMM
 电脑,NOUN,THING|MEDIA
 电视,NOUN,THING|MEDIA
@@ -276,6 +431,7 @@ word,tags,sem
 牛奶,NOUN,DRINK
 啤酒,NOUN,DRINK
 果汁,NOUN,DRINK
+汤,NOUN,DRINK
 饭,NOUN,FOOD
 菜,NOUN,FOOD
 面包,NOUN,FOOD
@@ -285,11 +441,17 @@ word,tags,sem
 西瓜,NOUN,FOOD|PLANT
 草莓,NOUN,FOOD|PLANT
 葡萄,NOUN,FOOD|PLANT
+水果,NOUN,FOOD|PLANT
+蔬菜,NOUN,FOOD|PLANT
 米饭,NOUN,FOOD
 面条,NOUN,FOOD
 蛋糕,NOUN,FOOD
 糖,NOUN,FOOD
 巧克力,NOUN,FOOD
+早饭,NOUN,FOOD
+午饭,NOUN,FOOD
+晚饭,NOUN,FOOD
+药,NOUN,MED
 钱,NOUN,MONEY
 车,NOUN,VEHICLE
 自行车,NOUN,VEHICLE
@@ -306,16 +468,10 @@ word,tags,sem
 家,NOUN,PLACE
 房间,NOUN,PLACE
 厨房,NOUN,PLACE
-桌子,NOUN,THING
-椅子,NOUN,THING
-门,NOUN,THING
-窗户,NOUN,THING
-床,NOUN,THING
-衣服,NOUN,CLOTH
-裤子,NOUN,CLOTH
-鞋,NOUN,CLOTH
-帽子,NOUN,CLOTH
-裙子,NOUN,CLOTH
+地方,NOUN,PLACE
+这里,NOUN,PLACE
+那里,NOUN,PLACE
+哪里,NOUN,PLACE
 中国,NOUN,PLACE
 日本,NOUN,PLACE
 美国,NOUN,PLACE
@@ -326,6 +482,16 @@ word,tags,sem
 北京,NOUN,PLACE
 上海,NOUN,PLACE
 东京,NOUN,PLACE
+桌子,NOUN,THING
+椅子,NOUN,THING
+门,NOUN,THING
+窗户,NOUN,THING
+床,NOUN,THING
+衣服,NOUN,CLOTH
+裤子,NOUN,CLOTH
+鞋,NOUN,CLOTH
+帽子,NOUN,CLOTH
+裙子,NOUN,CLOTH
 汉语,NOUN,LEARN
 中文,NOUN,LEARN
 英语,NOUN,LEARN
@@ -334,8 +500,15 @@ word,tags,sem
 汉字,NOUN,LEARN
 词,NOUN,LEARN
 生词,NOUN,LEARN
+课,NOUN,LEARN
+课文,NOUN,LEARN|MEDIA
 问题,NOUN,ABSTRACT
+作业,NOUN,ABSTRACT
+考试,NOUN,ABSTRACT
 礼物,NOUN,THING
+电影票,NOUN,THING
+东西,NOUN,THING
+电话,NOUN,COMM|THING
 花,NOUN,PLANT
 雨,NOUN,NATURE
 雪,NOUN,NATURE
@@ -346,10 +519,8 @@ word,tags,sem
 白色,NOUN,THING
 黑色,NOUN,THING
 歌,NOUN,AUDIO
-电影票,NOUN,THING
-东西,NOUN,THING
-地方,NOUN,PLACE
 时间,NOUN,ABSTRACT
+时候,NOUN,TIME_NOUN|ABSTRACT
 名字,NOUN,ABSTRACT
 工作,NOUN|VI|VT,ABSTRACT
 学习,NOUN|VI|VLEARN,ABSTRACT
@@ -360,8 +531,8 @@ word,tags,sem
 看,VWATCH,
 读,VREAD|VI,
 写,VT|VI,
-喜欢,VT|VC,
-爱,VT|VC,
+喜欢,VC|MENTAL,
+爱,VC|MENTAL,
 做,VT,
 听,VLISTEN,
 唱,VT|VI,
@@ -372,10 +543,10 @@ word,tags,sem
 问,VT,
 教,VTEACH,
 告诉,VTELL,
-知道,VT,
+知道,VC,
 认识,VT,
-觉得,VT,
-给,VT|PREP,
+觉得,VC,
+给,VT|PREP_REL,
 打,VCALL,
 借,VT,
 等,VT,
@@ -390,8 +561,9 @@ word,tags,sem
 看见,VWATCH,
 听见,VLISTEN,
 找到,VT,
-希望,VT|VC,
-需要,VT|VC,
+希望,VC|MENTAL,
+需要,VC|MENTAL,
+玩,VT|VI,
 来,VI,
 去,VI,
 走,VI,
@@ -415,6 +587,11 @@ word,tags,sem
 上班,VI,
 下班,VI,
 起床,VI,
+唱歌,VI,
+跳舞,VI,
+跑步,VI,
+散步,VI,
+开车,VI,
 说,VT|VI,
 学,VLEARN|VI,
 是,SHI,
@@ -432,13 +609,9 @@ word,tags,sem
 没,NEG1,
 也,ADV,
 都,ADV,
-还,ADV,
+还,ADV|BI_ADV,
 再,ADV,
 又,ADV,
-很,ADV,
-真,ADV,
-非常,ADV,
-太,ADV,
 已经,ADV,
 正在,ADV,
 刚,ADV,
@@ -450,17 +623,22 @@ word,tags,sem
 先,ADV,
 其实,ADV,
 大概,ADV,
-特别,ADV,
+更,ADV|BI_ADV,
+很,DEG_ADV,
+真,DEG_ADV,
+非常,DEG_ADV,
+太,DEG_ADV,
+特别,DEG_ADV,
 快,ADV|ADJ,
 慢,ADV|ADJ,
-好,ADV|ADJ,
-在,PREP,
-跟,PREP,
-从,PREP,
-到,PREP,
-为,PREP,
-比,PREP,
-向,PREP,
+好,ADJ,
+在,PREP_ZAI,
+跟,PREP_REL,
+从,PREP_DIR,
+到,PREP_DIR,
+为,PREP_REL,
+比,PREP_BI,
+向,PREP_REL,
 大,ADJ,
 小,ADJ,
 坏,ADJ,
@@ -516,6 +694,7 @@ word,tags,sem
 简单,ADJ,
 的,DE,
 了,LE,
+过,EXP,
 吗,FP,
 呢,FP,
 吧,FP,
@@ -529,528 +708,718 @@ word,tags,sem
 而且,CLCONJ,
 如果,CLCONJ,
 虽然,CLCONJ,
-几,NUM,
-过,EXP,
-课,NOUN,LEARN
-作业,NOUN,ABSTRACT
-考试,NOUN,ABSTRACT
-水果,NOUN,FOOD|PLANT
-蔬菜,NOUN,FOOD|PLANT
-早饭,NOUN,FOOD
-午饭,NOUN,FOOD
-晚饭,NOUN,FOOD
-玩,VT|VI,
-唱歌,VI,
-跳舞,VI,
-跑步,VI,
-散步,VI,
-开车,VI,
-电话,NOUN,COMM|THING
-汤,NOUN,DRINK
-药,NOUN,MED
-课文,NOUN,LEARN|MEDIA
 </script>
-<script id="grame-engine">
-'use strict';
-/* Grame 文法エンジン: 内蔵辞書(品詞タグ付き)+有限状態文法で判定する。
-   コーパスの文そのものには縛られない。辞書に語を足せば語彙が増える。 */
-
-// ---------- 辞書: lexicon.csv (word,tags) を読む ----------
-// PRON 代詞 / DEM 指示 / NOUN 名詞 / TIME 時間詞 / NUM 数詞 / MW 量詞 / SUI 岁
-// VT 他動詞 / VI 自動詞 / SHI 是 / YOU 有 / MODAL 助動詞 / ADV 副詞
-// NEG0 不 / NEG1 没 / NEG2 没有(動詞否定) / EXP 过
-// PREP 介詞 / ADJ 形容詞 / DE 的 / LE 了 / FP 語気助詞
-// CONJ 和(名詞並列) / CLCONJ 節接続詞(但是・所以など、完成後のみ)
-const SEM = {};
-function parseLexicon(csv) {
-  const lex = {};
-  for (const line of String(csv).split(/\r?\n/)) {
-    const t = line.trim();
-    if (!t || t.startsWith('#') || t.startsWith('word,')) continue;
-    const parts = t.split(',');
-    if (parts.length < 2) continue;
-    const w = parts[0].trim();
-    const tags = parts[1].split('|').map(s => s.trim()).filter(Boolean);
-    const sems = (parts[2] || '').split('|').map(s => s.trim()).filter(Boolean);
-    if (!w || !tags.length) continue;
-    lex[w] = tags.concat(sems.map(s => 'S_' + s));
-    if (sems.length) SEM[w] = sems;
-  }
-  return lex;
-}
-function loadLexiconCsv() {
-  if (typeof document !== 'undefined') {
-    const el = document.getElementById('lexicon-csv');
-    if (el) return el.textContent;
-  }
-  if (typeof require !== 'undefined') {
-    try { return require('fs').readFileSync(require('path').join(__dirname, 'lexicon.csv'), 'utf-8'); } catch (e) {}
-  }
-  return '';
-}
-const LEXICON = parseLexicon(loadLexiconCsv());
-
-// ---------- 文法 (NFA) ----------
-const ACCEPTING = new Set(['COMPLETE', 'COMPLETE2', 'FINAL', 'VI']);
-function buildNP(P, outer, accepting, T, nounTags) {
-  const NT = nounTags || ['NOUN'];
-  const put = (s, tag, next) => {
-    const m = (T[s] = T[s] || {});
-    const arr = (m[tag] = m[tag] || []);
-    for (const n of [].concat(next)) if (!arr.includes(n)) arr.push(n);
-  };
-  const putN = (s, next) => { for (const t of NT) put(s, t, next); };
-  put(P + '0', 'PRON', P + 'OK');
-  put(P + '0', 'DEM', [P + 'DEM', P + 'OK']);       // 这/那 は代詞にもなる
-  put(P + '0', 'NUM', P + 'NUM');
-  putN(P + '0', P + 'OK');
-  put(P + '0', 'ADJ', P + 'ADJ');                   // 新〜 / 新的〜
-  put(P + '0', 'TIME', P + 'OK');                   // 今天は主語にもなる
-  put(P + 'DEM', 'MW', P + 'DEMM');
-  putN(P + 'DEMM', P + 'OK');
-  put(P + 'DEMM', 'ADJ', P + 'ADJ');
-  put(P + 'NUM', 'MW', P + 'NUMM');
-  putN(P + 'NUMM', P + 'OK');
-  put(P + 'NUMM', 'ADJ', P + 'ADJ');
-  put(P + 'NUMM', 'SUI', P + 'OK');                 // 十岁的人 のような年齢修飾も名詞句に
-  putN(P + 'ADJ', P + 'OK');
-  put(P + 'ADJ', 'DE', P + 'DE');
-  putN(P + 'DE', P + 'OK');
-  put(P + 'DE', 'ADJ', P + 'ADJ');
-  put(P + 'DE', 'NUM', P + 'NUM');                  // 我的三本书
-  put(P + 'OK', 'DE', P + 'DE');
-  put(P + 'OK', 'CONJ', P + '0');                   // 和による並列
-  for (const [tag, next] of Object.entries(outer)) { put(P + 'OK', tag, next); put(P + 'DE', tag, next); }
-  if (accepting) { ACCEPTING.add(P + 'OK'); ACCEPTING.add(P + 'DE'); }
-}
-
-// 意味クラスで目的語を制限する動詞: タグ -> {builder接頭辞, 許可する意味クラス, 日本語説明}
-const VCLASS = {
-  VEAT:   { b: 'E', sem: ['S_FOOD', 'S_DRINK', 'S_MED'], ja: '食べ物・飲み物' },
-  VDRINK: { b: 'D', sem: ['S_DRINK'], ja: '飲み物' },
-  VWATCH: { b: 'W', sem: ['S_ANIMATE', 'S_FOOD', 'S_DRINK', 'S_PLACE', 'S_THING', 'S_MEDIA', 'S_CLOTH', 'S_VEHICLE', 'S_PLANT', 'S_COMM', 'S_LEARN', 'S_NATURE', 'S_MONEY'], ja: '見られるもの' },
-  VREAD:  { b: 'R', sem: ['S_MEDIA', 'S_LEARN'], ja: '読むもの' },
-  VLISTEN:{ b: 'U', sem: ['S_AUDIO', 'S_LEARN'], ja: '聞くもの' },
-  VLEARN: { b: 'G', sem: ['S_LEARN'], ja: '学ぶ内容', viObject: true },
-  VWEAR:  { b: 'C', sem: ['S_CLOTH'], ja: '衣類' },
-  VOPEN:  { b: 'Y', sem: ['S_VEHICLE', 'S_THING'], ja: '開ける・乗るもの' },
-  VCALL:  { b: 'K', sem: ['S_COMM'], ja: '電話' },
-  VPLANT: { b: 'F', sem: ['S_PLANT'], ja: '植物' },
-  VRAISE: { b: 'A', sem: ['S_ANIMATE', 'S_PLANT'], ja: '生き物・植物' },
-  VTEACH: { b: 'H', sem: ['S_LEARN', 'S_ANIMATE'], ja: '教える内容か相手' },
-  VTELL:  { b: 'J', sem: ['S_ANIMATE'], ja: '相手（人・動物）' },
-};
-const AGENTIVE = new Set(['VT', 'VC', 'VI', 'MODAL', ...Object.keys(VCLASS)]);
-
-function buildTransitions() {
-  const T = {};
-  const put = (s, tag, next) => {
-    const m = (T[s] = T[s] || {});
-    const arr = (m[tag] = m[tag] || []);
-    for (const n of [].concat(next)) if (!arr.includes(n)) arr.push(n);
-  };
-  const copyInto = (dst, srcState) => { for (const [tag, n] of Object.entries(T[srcState] || {})) put(dst, tag, n); };
-
-  const completeOuter = { FP: ['FINAL'], LE: ['COMPLETE2'], CLCONJ: ['CLAUSE'], PREP: ['P0'] };
-  const classEntries = {};
-  for (const tag of Object.keys(VCLASS)) classEntries[tag] = ['Q' + tag];
-  const predOuter = {
-    ADV: ['PRED'], MODAL: ['VZONE'],
-    NEG0: ['NEGP0'], NEG1: ['NEGP'], NEG2: ['PREDN'], NUM: ['AGE'],
-    SHI: ['O0'], YOU: ['O0'],
-    VT: ['VT'], VC: ['VC'], VI: ['VI'], ADJ: ['COMPLETE'],
-    ...classEntries,
-  };
-  const subjOuter = {
-    TIME: ['SUBJ'], ADV: ['PRED'], MODAL: ['VZONE'],
-    NEG0: ['NEGP0'], NEG1: ['NEGP'], NEG2: ['PREDN'], NUM: ['AGE'],
-    SHI: ['O0'], YOU: ['O0'], PREP: ['P0'],
-    VT: ['VT'], VC: ['VC'], VI: ['VI'], ADJ: ['COMPLETE'],
-    ...classEntries,
-  };
-
-  buildNP('S', subjOuter, false, T);
-  buildNP('O', completeOuter, true, T);   // 目的語が組み上がれば文は完成
-  buildNP('P', Object.assign({}, predOuter, completeOuter), true, T); // 在の目的語: 述語へ戻る/在自体が述語なら完成
-  buildNP('L', Object.assign({}, predOuter, completeOuter), true, T, ['S_PLACE']); // 行き先(場所のみ)
-  for (const [tag, vc] of Object.entries(VCLASS)) {
-    buildNP(vc.b, completeOuter, true, T, vc.sem);
-    if (vc.viObject) put(vc.b + '0', 'VI', vc.b + 'OK');  // 学游泳 のような技能目的語
-  }
-
-  // 文頭
-  put('START', 'TIME', 'STARTT');
-  put('START', 'CLCONJ', 'CLAUSE');                 // 如果/虽然/所以 で始まる文も可
-  copyInto('START', 'S0');
-  copyInto('STARTT', 'S0');
-  put('STARTT', 'TIME', 'STARTT');
-  // 否定の後: 不は是OK・有NG / 没は有OK・是NG(名詞目的語=欠落の対象) / 没有(動詞否定)は是・有ともNG
-  put('NEGP0', 'ADV', 'NEGP0'); put('NEGP0', 'MODAL', 'VZONE');
-  put('NEGP0', 'SHI', 'O0');
-  put('NEGP0', 'VT', 'VT'); put('NEGP0', 'VC', 'VC'); put('NEGP0', 'VI', 'VI'); put('NEGP0', 'ADJ', 'COMPLETE');
-  put('NEGP', 'ADV', 'NEGP'); put('NEGP', 'MODAL', 'VZONE');
-  put('NEGP', 'YOU', 'O0');
-  put('NEGP', 'VT', 'VT'); put('NEGP', 'VC', 'VC'); put('NEGP', 'VI', 'VI'); put('NEGP', 'ADJ', 'COMPLETE');
-  copyInto('NEGP', 'O0');                            // 我没钱 の「ない対象」
-  put('PREDN', 'ADV', 'PREDN'); put('PREDN', 'MODAL', 'VZONE');
-  put('PREDN', 'VT', 'VT'); put('PREDN', 'VC', 'VC'); put('PREDN', 'VI', 'VI'); put('PREDN', 'ADJ', 'COMPLETE');
-  // 年齢述語: 数詞 -> 岁 で完成
-  put('AGE', 'SUI', 'COMPLETE');
-  // 経験の「过」: 動詞の後ろで目的語も取れる
-  ACCEPTING.add('EXP');
-  copyInto('EXP', 'O0');
-  for (const [tag, n] of Object.entries(completeOuter)) put('EXP', tag, n);
-  // 意味クラス動詞の状態: 目的語はクラス制限ビルダーから
-  for (const [tag, vc] of Object.entries(VCLASS)) {
-    const st = 'Q' + tag;
-    put(st, 'LE', 'COMPLETE');
-    put(st, 'EXP', 'EXP');
-    put(st, 'PREP', 'P0');
-    copyInto(st, vc.b + '0');
-    put('VZONE', tag, st);
-    put('NEGP0', tag, st); put('NEGP', tag, st); put('PREDN', tag, st);
-  }
-  // 主語の後
-  for (const [tag, n] of Object.entries(subjOuter)) put('SUBJ', tag, n);
-  // 述語ゾーン(副詞・介詞句の後)
-  for (const [tag, n] of Object.entries(predOuter)) put('PRED', tag, n);
-  // 助動詞の後
-  put('VZONE', 'VT', 'VT'); put('VZONE', 'VI', 'VI');
-  put('VZONE', 'VC', 'VC');
-  put('VZONE', 'SHI', 'O0'); put('VZONE', 'ADV', 'VZONE');
-  // 他動詞の後: 目的語か了。介詞句を挟むのも許可(緩め)
-  put('VT', 'LE', 'COMPLETE');
-  put('VT', 'EXP', 'EXP');
-  copyInto('VT', 'O0');
-  put('VT', 'PREP', 'P0');
-  // 自動詞の後: 場所の目的語(去中国。場所制限ビルダー経由で連動文「去+場所+動詞」も可)や完成後の要素
-  put('VI', 'EXP', 'EXP');
-  copyInto('VI', 'L0');
-  for (const [tag, n] of Object.entries(completeOuter)) put('VI', tag, n);
-  // 節の接続後: 主語あり/なし両対応
-  copyInto('CLAUSE', 'START');
-  for (const [tag, n] of Object.entries(predOuter)) put('CLAUSE', tag, n);
-  // 動詞句・節を取る動詞の後(喜欢/爱/希望/需要): 名詞目的語・動詞句・節のどれも可
-  copyInto('VC', 'O0');
-  copyInto('VC', 'CLAUSE');
-  // 完成後の了は一度だけ
-  for (const [tag, n] of Object.entries(completeOuter)) if (tag !== 'LE') put('COMPLETE2', tag, n);
-  // COMPLETE 自体の遷移(completeOuter + 後置の在/到)
-  for (const [tag, n] of Object.entries(completeOuter)) put('COMPLETE', tag, n);
-  return T;
-}
-
-const TRANSITIONS = buildTransitions();
-const ALL_TAGS = new Set(Object.values(LEXICON).flat());
-// 状態ごとの「辞書内のタグで先へ進めるか」は静的なので事前計算
-const STATE_EXTENDABLE = {};
-for (const [s, m] of Object.entries(TRANSITIONS)) STATE_EXTENDABLE[s] = Object.keys(m).some(t => ALL_TAGS.has(t));
-
-function phaseName(states) {
-  const s = [...states];
-  if (s.some(x => x === 'START' || x === 'STARTT' || x.startsWith('S'))) return '主語（名詞句）';
-  if (s.some(x => x === 'SUBJ' || x === 'PRED')) return '述語（動詞・形容詞・是など）';
-  if (s.some(x => x === 'NEGP0' || x === 'NEGP' || x === 'PREDN')) return '述語（動詞・形容詞）';
-  if (s.some(x => x === 'VZONE')) return '動詞';
-  if (s.some(x => x === 'VT' || x.startsWith('O'))) return '目的語（名詞句）';
-  if (s.some(x => x.startsWith('P'))) return '介詞の目的語か述語';
-  if (s.some(x => ACCEPTING.has(x))) return '完成した文の続き';
-  return '次の語';
-}
-const BUILDER_JA = {};
-for (const vc of Object.values(VCLASS)) BUILDER_JA[vc.b] = vc.ja;
-function slotHint(states) {
-  const s = [...states];
-  for (const x of s) {
-    if (x.startsWith('Q') && VCLASS[x.slice(1)]) return VCLASS[x.slice(1)].ja + 'の名詞';
-    if (BUILDER_JA[x[0]] && ['0', 'OK', 'DE', 'NUM', 'NUMM', 'DEM', 'DEMM', 'ADJ'].includes(x.slice(1))) return BUILDER_JA[x[0]] + 'の名詞';
-    if (x[0] === 'L' && ['0', 'OK', 'DE', 'NUM', 'NUMM', 'DEM', 'DEMM', 'ADJ'].includes(x.slice(1))) return '場所の名詞';
-  }
-  if (s.some(x => x.endsWith('NUM'))) return '量詞（一只の「只」など）';
-  if (s.some(x => x.endsWith('NUMM') || x.endsWith('DEMM'))) return '名詞';
-  if (s.some(x => x.endsWith('DEM'))) return '量詞';
-  if (s.some(x => x.endsWith('ADJ'))) return '名詞か「的」';
-  if (s.some(x => x.endsWith('DE'))) return '名詞';
-  return phaseName(states);
-}
-
-// 1語分の遷移。states: 配列。戻り値: 次状態配列 or null(不正/辞書外)
-function stepStates(states, w) {
-  const tags = LEXICON[w];
-  if (!tags) return null;
-  const next = new Set();
-  for (const st of states) {
-    const tr = TRANSITIONS[st] || {};
-    for (const tag of tags) if (tr[tag]) for (const ns of tr[tag]) next.add(ns);
-  }
-  return next.size ? [...next] : null;
-}
-function evalStates(states) {
-  return {
-    complete: states.some(s => ACCEPTING.has(s)),
-    extendable: states.some(s => STATE_EXTENDABLE[s]),
-  };
-}
-
-const analyzeCache = new Map();
-function analyze(words) {
-  const key = words.join('\u0001');
-  if (analyzeCache.has(key)) return analyzeCache.get(key);
-  let states = ['START'];
-  let result = null;
-  // 主語の有生性チェック用: 主語フェーズで最後に出た名詞(文の頭)を記録する
-  let subjHead = null, subjClosed = false, animacyChecked = false;
-  const inSubjPhase = ss => ss.some(s => s === 'START' || s === 'STARTT' || s.startsWith('S'));
-  for (let i = 0; i < words.length; i++) {
-    const w = words[i];
-    if (!LEXICON[w]) { result = { valid: false, complete: false, extendable: false, reason: `「${w}」は辞書にない語（収録語彙の範囲で判定している）` }; break; }
-    if (!subjClosed && inSubjPhase(states) && SEM[w]) subjHead = { word: w, sems: SEM[w] };
-    const next = stepStates(states, w);
-    if (!next) { result = { valid: false, complete: false, extendable: false, reason: `「${w}」の置き場所がない。今の文は${slotHint(states)}を待っている` }; break; }
-    if (!subjClosed && !inSubjPhase(next)) subjClosed = true;
-    if (subjClosed && !animacyChecked && w !== '下雨' && LEXICON[w].some(t => AGENTIVE.has(t))) {
-      animacyChecked = true;
-      if (subjHead && !subjHead.sems.includes('ANIMATE')) {
-        result = { valid: false, complete: false, extendable: false, reason: `「${subjHead.word}」は生き物ではないので、「${w}」の主語にはなれない` };
-        break;
-      }
-    }
-    states = next;
-  }
-  if (!result) {
-    const ev = evalStates(states);
-    result = { valid: true, complete: ev.complete, extendable: ev.extendable, states };
-  }
-  if (analyzeCache.size > 4000) analyzeCache.clear();
-  analyzeCache.set(key, result);
-  return result;
-}
-
-// AIの手（候補は analyze で意味チェックまで通す）
-function legalMoves(words) {
-  const base = analyze(words);
-  if (!base.valid) return [];
-  const out = [];
-  for (const w of Object.keys(LEXICON)) {
-    const r = analyze(words.concat(w));
-    if (r.valid) out.push({ word: w, complete: r.complete, extendable: r.extendable, states: r.states });
-  }
-  return out;
-}
-function aiChoose(words) {
-  const moves = legalMoves(words);
-  if (!moves.length) return null;
-  const win = moves.filter(m => m.complete && !m.extendable);
-  if (win.length) return win[Math.floor(Math.random() * win.length)].word;
-  const safe = moves.filter(m => {
-    for (const w2 of Object.keys(LEXICON)) {
-      const ns = stepStates(m.states, w2);
-      if (ns) { const ev = evalStates(ns); if (ev.complete && !ev.extendable) return false; }
-    }
-    return true;
-  });
-  let pool = safe.length ? safe : moves;
-  // 副詞を積み続けて停滞するのを防ぐ: 長くなったら副詞以外の手を優先
-  const nonAdv = pool.filter(m => !LEXICON[m.word].includes('ADV'));
-  if (words.length >= 5 && nonAdv.length) pool = nonAdv;
-  const finishing = pool.filter(m => m.complete);
-  const pickFrom = finishing.length && (words.length >= 8 || Math.random() < 0.6) ? finishing : pool;
-  return pickFrom[Math.floor(Math.random() * pickFrom.length)].word;
-}
-
-const GrameEngine = { LEXICON, SEM, analyze, legalMoves, aiChoose };
-if (typeof module !== 'undefined' && module.exports) module.exports = GrameEngine;
-if (typeof window !== 'undefined') window.GrameEngine = GrameEngine;
-</script>
+<script src="grame-engine.js"></script>
 <script>
-const $ = id => document.getElementById(id);
-const E = window.GrameEngine;
+'use strict';
 
+const $ = id => document.getElementById(id);
+
+const STATS_KEY = 'grame_stats_v1';
+let stats = loadStats();
+let E = null;
 let order = 'first';
-let words = [];       // 現在の語列
+let selectedMode = 'local'; // 'local' | 'ai'
+let envAI = { configured: false, model: '', base: '' };
+let words = [];
 let over = false;
 let busy = false;
-let envAI = { configured: false, model: '', base: '' };  // /api/chat の環境変数状態
+let activeAssistCat = 'all';
+let pendingAiRetry = null;
 
-function aiMode() { return envAI.configured; }
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        win: Number(parsed.win) || 0,
+        loss: Number(parsed.loss) || 0,
+        streak: Number(parsed.streak) || 0,
+      };
+    }
+  } catch (_) {}
+  return { win: 0, loss: 0, streak: 0 };
+}
 
-function log(html) {
+function saveStats() {
+  try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch (_) {}
+  renderStats();
+}
+
+function renderStats() {
+  $('statWin').textContent = String(stats.win);
+  $('statLoss').textContent = String(stats.loss);
+  $('statStreak').textContent = String(stats.streak);
+}
+
+function aiMode() {
+  return selectedMode === 'ai' && envAI.configured;
+}
+
+function clearInlineError() {
+  $('inlineErr').classList.remove('show');
+  $('inlineErrMsg').textContent = '';
+  $('retryAiBtn').classList.add('hidden');
+  pendingAiRetry = null;
+}
+
+function showInlineError(msg, retryFn) {
+  $('inlineErrMsg').textContent = msg;
+  if (typeof retryFn === 'function') {
+    pendingAiRetry = retryFn;
+    $('retryAiBtn').classList.remove('hidden');
+  } else {
+    pendingAiRetry = null;
+    $('retryAiBtn').classList.add('hidden');
+  }
+  $('inlineErr').classList.add('show');
+}
+
+function appendLog(prefixBold, text) {
   const el = $('log');
-  if (el.dataset.empty) { el.innerHTML = ''; delete el.dataset.empty; }
-  const d = document.createElement('div'); d.innerHTML = html;
-  el.appendChild(d); el.scrollTop = el.scrollHeight;
+  if (el.dataset.empty) {
+    el.innerHTML = '';
+    delete el.dataset.empty;
+  }
+  const row = document.createElement('div');
+  if (prefixBold) {
+    const b = document.createElement('b');
+    b.textContent = prefixBold;
+    row.appendChild(b);
+  }
+  row.appendChild(document.createTextNode(text));
+  el.appendChild(row);
+  el.scrollTop = el.scrollHeight;
 }
-function render() {
+
+function renderSentence() {
   const s = $('sentence');
-  if (!words.length) { s.innerHTML = '<span class="empty-hint">最初の1単語を入力してください</span>'; return; }
-  s.innerHTML = words.map((w, i) => {
+  s.innerHTML = '';
+  if (!words.length) {
+    const span = document.createElement('span');
+    span.className = 'empty-hint';
+    span.textContent = '最初の1単語を入力してください';
+    s.appendChild(span);
+    return;
+  }
+  words.forEach((w, i) => {
     const mine = (i % 2 === 0) === (order === 'first');
-    return `<div class="tile ${mine ? 'you' : 'ai'}"><span class="who">${mine ? 'あなた' : 'AI'}</span><div class="w">${w}</div></div>`;
-  }).join('');
+    const tile = document.createElement('div');
+    tile.className = 'tile ' + (mine ? 'you' : 'ai');
+
+    const who = document.createElement('span');
+    who.className = 'who';
+    who.textContent = mine ? 'あなた' : 'AI';
+
+    const wordEl = document.createElement('div');
+    wordEl.className = 'w';
+    wordEl.textContent = w;
+
+    tile.appendChild(who);
+    tile.appendChild(wordEl);
+
+    if (E && E.LEXICON[w]) {
+      const cat = E.getCategoryForWord(w);
+      const tagEl = document.createElement('div');
+      tagEl.className = 'tag';
+      tagEl.textContent = cat.label;
+      tile.appendChild(tagEl);
+    }
+    s.appendChild(tile);
+  });
 }
+
+function updateStateUI() {
+  const pill = $('sentenceStatePill');
+  const hintEl = $('slotHint');
+
+  if (over) {
+    pill.textContent = '決着';
+    pill.className = 'state-pill';
+    hintEl.textContent = '';
+    $('assistBox').classList.add('hidden');
+    return;
+  }
+
+  if (aiMode()) {
+    pill.textContent = words.length ? `${words.length}語` : '文頭';
+    pill.className = 'state-pill';
+    hintEl.textContent = words.length ? 'AI対戦モード：自由な中国語単語（漢字1〜5文字）で続けられます' : '最初の1単語を入力してください';
+    $('assistBox').classList.add('hidden');
+    return;
+  }
+
+  const st = E.analyze(words);
+  if (!st.valid) {
+    pill.textContent = '破綻';
+    pill.className = 'state-pill';
+    hintEl.textContent = '';
+    $('assistBox').classList.add('hidden');
+    return;
+  }
+
+  if (!words.length) {
+    pill.textContent = '文頭';
+    pill.className = 'state-pill';
+  } else if (st.complete) {
+    pill.textContent = `完成（${words.length}語）`;
+    pill.className = 'state-pill complete';
+  } else {
+    pill.textContent = `途中（${words.length}語）`;
+    pill.className = 'state-pill';
+  }
+
+  const moves = E.legalMoves(words);
+  hintEl.textContent = moves.length
+    ? `次の目安：${st.hint}（続けられる語：${moves.length}語）`
+    : '続けられる語がありません';
+
+  const mineTurn = !busy && !$('playBtn').disabled;
+  if ($('assistToggle').checked && mineTurn && moves.length) {
+    renderAssist(moves);
+    $('assistBox').classList.remove('hidden');
+  } else {
+    $('assistBox').classList.add('hidden');
+  }
+}
+
+function renderAssist(moves) {
+  const tabsEl = $('assistTabs');
+  const chipsEl = $('assistChips');
+  const query = $('assistSearch').value.trim();
+
+  const catBuckets = new Map();
+  for (const m of moves) {
+    const cat = E.getCategoryForWord(m.word);
+    if (!catBuckets.has(cat.id)) catBuckets.set(cat.id, { id: cat.id, label: cat.label, items: [] });
+    catBuckets.get(cat.id).items.push(m);
+  }
+
+  if (activeAssistCat !== 'all' && !catBuckets.has(activeAssistCat)) {
+    activeAssistCat = 'all';
+  }
+
+  tabsEl.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.className = 'cat-tab' + (activeAssistCat === 'all' ? ' on' : '');
+  allBtn.textContent = `すべて (${moves.length})`;
+  allBtn.addEventListener('click', () => { activeAssistCat = 'all'; renderAssist(moves); });
+  tabsEl.appendChild(allBtn);
+
+  for (const group of catBuckets.values()) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cat-tab' + (activeAssistCat === group.id ? ' on' : '');
+    b.textContent = `${group.label} (${group.items.length})`;
+    b.addEventListener('click', () => { activeAssistCat = group.id; renderAssist(moves); });
+    tabsEl.appendChild(b);
+  }
+
+  let filtered = activeAssistCat === 'all' ? moves : (catBuckets.get(activeAssistCat)?.items || []);
+  if (query) filtered = filtered.filter(m => m.word.includes(query));
+
+  chipsEl.innerHTML = '';
+  const maxShow = 80;
+  const shown = filtered.slice(0, maxShow);
+
+  if (!shown.length) {
+    const empty = document.createElement('span');
+    empty.className = 'empty-hint';
+    empty.textContent = '該当する候補がありません';
+    chipsEl.appendChild(empty);
+    return;
+  }
+
+  for (const m of shown) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip' + (m.complete && !m.extendable ? ' win-chip' : '');
+    btn.textContent = m.word;
+    btn.title = m.complete && !m.extendable ? 'この手で文が完成し勝利' : (m.complete ? '文が完成する手' : '文を続ける手');
+    btn.addEventListener('click', () => {
+      $('wordInput').value = m.word;
+      playerMove();
+    });
+    chipsEl.appendChild(btn);
+  }
+
+  if (filtered.length > maxShow) {
+    const more = document.createElement('span');
+    more.className = 'empty-hint';
+    more.style.alignSelf = 'center';
+    more.textContent = `他 ${filtered.length - maxShow} 語（検索で絞り込み）`;
+    chipsEl.appendChild(more);
+  }
+}
+
 function setTurn(mine) {
   const c = $('turnChip');
-  c.textContent = mine ? 'あなたの番' : 'AIの番';
+  c.textContent = mine ? 'あなたの番' : (busy && aiMode() ? 'AIが思考中…' : 'AIの番');
   c.className = 'turnchip' + (mine ? '' : ' ai');
-  $('playBtn').disabled = !mine || busy || over;
-  $('wordInput').disabled = !mine || busy || over;
-  updateHint();
+  const canPlay = mine && !busy && !over;
+  $('playBtn').disabled = !canPlay;
+  $('wordInput').disabled = !canPlay;
+  updateStateUI();
 }
-function updateHint() {
-  if (!words.length || over) { $('slotHint').textContent = ''; return; }
-  if (aiMode()) { $('slotHint').textContent = ''; return; }
-  const st = E.analyze(words);
-  if (!st.valid) { $('slotHint').textContent = ''; return; }
-  const moves = E.legalMoves(words);
-  $('slotHint').textContent = moves.length ? `続けられる語：${moves.length}語` : '';
-}
+
 function endGame(win, text) {
   over = true;
+  if (win) {
+    stats.win += 1;
+    stats.streak += 1;
+  } else {
+    stats.loss += 1;
+    stats.streak = 0;
+  }
+  saveStats();
+
   const box = $('resultBox');
   box.className = 'result ' + (win ? 'win' : 'lose');
-  box.textContent = (win ? '🏆 あなたの勝ち　' : '💥 あなたの負け　') + text;
+  box.innerHTML = '';
+  const lead = document.createElement('span');
+  lead.textContent = (win ? '🏆 あなたの勝ち　' : '💥 あなたの負け　') + text;
+  box.appendChild(lead);
+  if (words.length) {
+    const fs = document.createElement('span');
+    fs.className = 'final-sentence';
+    fs.textContent = `「${words.join('')}」`;
+    box.appendChild(fs);
+  }
+
   $('againBtn').classList.remove('hidden');
+  $('backSetupBtn').classList.remove('hidden');
   $('playRow').classList.add('hidden');
-  $('slotHint').textContent = '';
-  log(`<b>決着：</b>${win ? 'あなたの勝ち' : 'あなたの負け'}。${text}`);
+  $('giveupBtn').classList.add('hidden');
+  $('assistBox').classList.add('hidden');
+  setTurn(false);
+  appendLog('決着：', `${win ? 'あなたの勝ち' : 'あなたの負け'}。${text}`);
 }
 
 // ---------- 文法モード ----------
-function localPlay(word) {  // プレイヤーの手。true=続行
+function localPlay(word) {
   const r = E.analyze(words.concat(word));
-  if (!r.valid) { endGame(false, r.reason + '。AIの勝ち。'); return false; }
-  words.push(word); render();
-  log(`<b>あなた → ${word}</b>（${r.complete ? '文が完成' : '文の途中として成立'}）`);
-  if (r.complete && !r.extendable) { endGame(true, `「${words.join('')}」が完成し、自然な続きがない。`); return false; }
-  if (!r.extendable) { endGame(true, `「${words.join('')}」から続けられる語がない。`); return false; }
+  if (!r.valid) {
+    endGame(false, r.reason + '。AIの勝ち。');
+    return false;
+  }
+  words.push(word);
+  renderSentence();
+  appendLog(`あなた → ${word}`, `（${r.complete ? '文が完成' : '文の途中として成立'}）`);
+  if (r.complete && !r.extendable) {
+    endGame(true, `「${words.join('')}」が完成し、自然な続きがない。`);
+    return false;
+  }
+  if (!r.extendable) {
+    endGame(true, `「${words.join('')}」から続けられる語がない。`);
+    return false;
+  }
   return true;
 }
+
 function localAiTurn() {
   setTurn(false);
   const w = E.aiChoose(words);
-  if (w === null) { endGame(true, 'AIが続けられなくなった。'); return; }
+  if (w === null) {
+    endGame(true, 'AIが続けられなくなった。');
+    return;
+  }
   const r = E.analyze(words.concat(w));
-  words.push(w); render();
-  log(`AI → ${w}（${r.complete ? '文が完成' : '文の途中として成立'}）`);
-  if (r.complete && !r.extendable) { endGame(false, `「${words.join('')}」が完成し、自然な続きがない。AIの勝ち。`); return; }
-  if (!r.extendable) { endGame(false, `「${words.join('')}」から続けられる語がない。AIの勝ち。`); return; }
-  setTurn(true); $('wordInput').focus();
+  words.push(w);
+  renderSentence();
+  appendLog(`AI → ${w}`, `（${r.complete ? '文が完成' : '文の途中として成立'}）`);
+  if (r.complete && !r.extendable) {
+    endGame(false, `「${words.join('')}」が完成し、自然な続きがない。AIの勝ち。`);
+    return;
+  }
+  if (!r.extendable) {
+    endGame(false, `「${words.join('')}」から続けられる語がない。AIの勝ち。`);
+    return;
+  }
+  setTurn(true);
+  $('wordInput').focus();
 }
 
 // ---------- AI対戦モード ----------
-const JUDGE_SYSTEM = `あなたは中国語の文法審判です。プレイヤーが交互に1単語ずつ追加して中国語の文を作るゲームの判定をします。現在の単語列と、最後に追加された単語が与えられます。以下を判定し、JSONのみで答えてください（前置き・コードフェンス禁止）。
+const JUDGE_SYSTEM = `あなたは中国語の文法審判です。プレイヤーが交互に1単語ずつ追加して中国語の文を作るゲームの判定をします。現在の単語列と、最後に追加された単語が与えられます。以下を判定し、JSONのみで答えてください（前置き・コードフェンス・<think>タグは禁止）。
 {"valid": true/false, "complete": true/false, "extendable": true/false, "reason": "日本語で短く"}
 - valid: 最後まで読んで文法的に正しい文、または正しい文の途中として成立するか
 - complete: 文として完成しているか（主語と述語が揃い意味が完結）
 - extendable: 完成している場合でも、了・吗・接続詞などで自然に続けられるなら true`;
-const MOVE_SYSTEM = `あなたは中国語の造句対戦ゲームのプレイヤーです。現在の単語列の末尾に、文法的に正しく続く中国語の単語を1つだけ追加してください。文を完成させて相手が続けられなくなるのが理想です。単語のみを出力してください（句読点・説明・引用符は禁止）。`;
+
+const MOVE_SYSTEM = `あなたは中国語の造句対戦ゲームのプレイヤーです。与えられた単語列の末尾に、文法的に正しく続く中国語の単語を1つだけ追加してください（単語列が空 [] なら文頭の1単語を選ぶ）。文を完成させて相手が続けられなくなるのが理想です。中国語の1単語のみ（漢字1〜5文字）を出力し、句読点・説明・引用符・<think>タグは絶対に含めないでください。`;
+
+function cleanThink(text) {
+  return String(text || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+}
 
 async function callAI(system, user) {
-  // APIキーはサーバーの環境変数側。ブラウザは同一オリジンのプロキシだけを叩く。
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ temperature: 0.3, messages: [
-      { role: 'system', content: system }, { role: 'user', content: user } ] }),
+    body: JSON.stringify({
+      temperature: 0.3,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user },
+      ],
+    }),
   });
-  if (!res.ok) throw new Error('APIエラー: ' + res.status);
-  const data = await res.json();
-  return data.choices[0].message.content.trim();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || ('APIエラー: ' + res.status));
+  }
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) throw new Error('AIの応答が空でした');
+  return cleanThink(content);
 }
+
 function parseJudge(text) {
-  const m = text.match(/\{[\s\S]*\}/);
-  if (!m) throw new Error('判定の解析に失敗');
+  const cleaned = cleanThink(text);
+  const m = cleaned.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('判定JSONの解析に失敗しました');
   return JSON.parse(m[0]);
 }
-async function aiJudge(lastWord) {
-  const t = await callAI(JUDGE_SYSTEM, `単語列: ${JSON.stringify(words)}\n最後に追加された単語: ${lastWord}`);
+
+async function aiJudge(targetWords, lastWord) {
+  const t = await callAI(
+    JUDGE_SYSTEM,
+    `単語列: ${JSON.stringify(targetWords)}\n最後に追加された単語: ${lastWord}`
+  );
   return parseJudge(t);
 }
+
 async function apiPlay(word) {
-  words.push(word); render();
+  const candidate = words.concat(word);
   let j;
-  try { j = await aiJudge(word); }
-  catch (e) { words.pop(); render(); alert('判定に失敗しました: ' + e.message); return false; }
-  log(`<b>あなた → ${word}</b>：${j.reason}`);
-  if (!j.valid) { endGame(false, j.reason + '。AIの勝ち。'); return false; }
-  if (j.complete && !j.extendable) { endGame(true, `「${words.join('')}」が完成。${j.reason}`); return false; }
+  try {
+    j = await aiJudge(candidate, word);
+  } catch (e) {
+    showInlineError('AI判定に失敗しました: ' + e.message, () => submitPlayerWord(word));
+    return false;
+  }
+  words.push(word);
+  renderSentence();
+  appendLog(`あなた → ${word}`, `：${j.reason}`);
+  if (!j.valid) {
+    endGame(false, j.reason + '。AIの勝ち。');
+    return false;
+  }
+  if (j.complete && !j.extendable) {
+    endGame(true, `「${words.join('')}」が完成。${j.reason}`);
+    return false;
+  }
   return true;
 }
+
+async function requestAiWord() {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const prompt = words.length
+      ? `現在の単語列: ${JSON.stringify(words)}`
+      : '現在の単語列は空 [] です。文頭となる自然な中国語の1単語を出力してください。';
+    const wRaw = await callAI(MOVE_SYSTEM, prompt);
+    const w = wRaw.replace(/[\s。、．，,．!！?？「」『』"'`]/g, '');
+    if (/^[\u4e00-\u9fff]{1,5}$/.test(w)) return w;
+  }
+  throw new Error('AIが有効な中国語1単語を返しませんでした');
+}
+
 async function apiAiTurn() {
+  busy = true;
   setTurn(false);
   try {
-    const wRaw = await callAI(MOVE_SYSTEM, `現在の単語列: ${JSON.stringify(words)}`);
-    const w = wRaw.replace(/[\s。、．，,．「」『』"']/g, '');
-    if (!w) throw new Error('AIの手が空でした');
-    words.push(w); render();
-    const j = await aiJudge(w);
-    log(`AI → ${w}：${j.reason}`);
-    if (!j.valid) { endGame(true, `AIの「${w}」で文法が破綻。${j.reason}`); return; }
-    if (j.complete && !j.extendable) { endGame(false, `「${words.join('')}」が完成。${j.reason}`); return; }
+    const w = await requestAiWord();
+    const candidate = words.concat(w);
+    const j = await aiJudge(candidate, w);
+    words.push(w);
+    renderSentence();
+    appendLog(`AI → ${w}`, `：${j.reason}`);
+    if (!j.valid) {
+      endGame(true, `AIの「${w}」で文法が破綻。${j.reason}`);
+      return;
+    }
+    if (j.complete && !j.extendable) {
+      endGame(false, `「${words.join('')}」が完成。${j.reason}`);
+      return;
+    }
   } catch (e) {
-    log('AIの手に失敗しました: ' + e.message);
-    alert('AIの手に失敗しました: ' + e.message);
+    appendLog('通信エラー：', e.message);
+    showInlineError('AIの手の取得に失敗しました: ' + e.message, apiAiTurn);
+  } finally {
+    busy = false;
+    if (!over) {
+      setTurn(true);
+      $('wordInput').focus();
+    }
   }
-  if (!over) { setTurn(true); $('wordInput').focus(); }
 }
 
 // ---------- 進行 ----------
+async function submitPlayerWord(w) {
+  if (over || busy) return;
+  clearInlineError();
+  busy = true;
+  setTurn(false);
+
+  let cont = false;
+  if (aiMode()) {
+    cont = await apiPlay(w);
+  } else {
+    cont = localPlay(w);
+  }
+  busy = false;
+
+  if (cont && !over) {
+    if (aiMode()) {
+      await apiAiTurn();
+    } else {
+      localAiTurn();
+    }
+  } else if (!over) {
+    setTurn(true);
+    $('wordInput').focus();
+  }
+}
+
 async function playerMove() {
   if (over || busy) return;
   const input = $('wordInput');
   const w = input.value.trim().replace(/\s+/g, '');
   if (!w) return;
-  if (!/^[\u4e00-\u9fff]+$/.test(w) || w.length > 5) { alert('漢字1単語（5文字まで）で入力してください。'); return; }
+  if (!/^[\u4e00-\u9fff]{1,5}$/.test(w)) {
+    showInlineError('漢字1単語（1〜5文字）で入力してください。');
+    return;
+  }
   input.value = '';
-  busy = true; setTurn(false);
-  let cont;
-  if (aiMode()) cont = await apiPlay(w); else cont = localPlay(w);
-  busy = false;
-  if (cont && !over) { if (aiMode()) await apiAiTurn(); else localAiTurn(); }
-  if (!over) setTurn(true);
+  $('assistSearch').value = '';
+  await submitPlayerWord(w);
 }
 
-$('orderSeg').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  order = b.dataset.order;
-  document.querySelectorAll('#orderSeg button').forEach(x => x.classList.toggle('on', x === b));
-});
-$('startBtn').addEventListener('click', async () => {
-  words = []; over = false; busy = false;
+function startNewMatch() {
+  words = [];
+  over = false;
+  busy = false;
+  activeAssistCat = 'all';
+  clearInlineError();
+
   $('setupCard').classList.add('hidden');
   $('gameCard').classList.remove('hidden');
   $('resultBox').className = 'result';
+  $('resultBox').innerHTML = '';
   $('againBtn').classList.add('hidden');
+  $('backSetupBtn').classList.add('hidden');
   $('playRow').classList.remove('hidden');
-  $('log').innerHTML = ''; $('log').dataset.empty = '1';
-  render();
-  $('modeChip').textContent = aiMode() ? 'AI対戦モード' : '文法モード（オフライン判定）';
-  log(`対戦開始（${order === 'first' ? '先行' : '後攻'}・${aiMode() ? 'AI対戦モード' : '文法モード'}）。`);
-  if (order === 'second') { busy = true; if (aiMode()) await apiAiTurn(); else localAiTurn(); busy = false; }
-  setTurn(true); $('wordInput').focus();
+  $('giveupBtn').classList.remove('hidden');
+
+  const logEl = $('log');
+  logEl.innerHTML = '';
+  logEl.dataset.empty = '1';
+
+  renderSentence();
+  appendLog('対戦開始：', `${order === 'first' ? '先行（あなた）' : '後攻（AI）'}・${aiMode() ? 'AI対戦モード' : '文法モード'}`);
+
+  if (order === 'second') {
+    if (aiMode()) {
+      apiAiTurn();
+    } else {
+      localAiTurn();
+    }
+  } else {
+    setTurn(true);
+    $('wordInput').focus();
+  }
+}
+
+// ---------- Dictionary Modal ----------
+function renderDictionary(filterText) {
+  if (!E) return;
+  const body = $('dictBody');
+  const q = (filterText || '').trim().toUpperCase();
+  const groups = E.getLexiconByCategory();
+  body.innerHTML = '';
+
+  let totalMatched = 0;
+  for (const g of groups) {
+    const items = q
+      ? g.words.filter(item =>
+          item.word.includes(q) ||
+          item.tags.some(t => t.toUpperCase().includes(q)) ||
+          item.sems.some(s => s.toUpperCase().includes(q)) ||
+          g.label.includes(q)
+        )
+      : g.words;
+    if (!items.length) continue;
+    totalMatched += items.length;
+
+    const sec = document.createElement('div');
+    sec.className = 'dict-group';
+    const h = document.createElement('h3');
+    h.textContent = `${g.label}（${items.length}）`;
+    sec.appendChild(h);
+
+    const list = document.createElement('div');
+    list.className = 'dict-words';
+    for (const item of items) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      btn.textContent = item.word;
+      btn.title = item.tags.concat(item.sems).join(' | ');
+      btn.addEventListener('click', () => {
+        if (!$('gameCard').classList.contains('hidden') && !over && !busy && !$('wordInput').disabled) {
+          $('wordInput').value = item.word;
+          closeDictModal();
+          $('wordInput').focus();
+        }
+      });
+      list.appendChild(btn);
+    }
+    sec.appendChild(list);
+    body.appendChild(sec);
+  }
+
+  $('dictCount').textContent = String(totalMatched);
+  if (!totalMatched) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-hint';
+    empty.textContent = '一致する語彙が見つかりませんでした。';
+    body.appendChild(empty);
+  }
+}
+
+function openDictModal() {
+  $('dictSearch').value = '';
+  renderDictionary('');
+  $('dictModal').classList.remove('hidden');
+  $('dictSearch').focus();
+}
+
+function closeDictModal() {
+  $('dictModal').classList.add('hidden');
+}
+
+// ---------- Event Listeners ----------
+$('orderSeg').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  order = b.dataset.order;
+  document.querySelectorAll('#orderSeg button').forEach(x => x.classList.toggle('on', x === b));
 });
-$('againBtn').addEventListener('click', () => {
+
+$('modeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  selectedMode = b.dataset.mode;
+  document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x === b));
+  updateModeChip();
+});
+
+function updateModeChip() {
+  const chip = $('modeChip');
+  if (aiMode()) {
+    chip.textContent = 'AI対戦モード（環境変数）';
+    chip.classList.remove('local');
+  } else {
+    chip.textContent = '文法モード（オフライン判定）';
+    chip.classList.add('local');
+  }
+}
+
+$('assistToggle').addEventListener('change', () => {
+  if (!$('gameCard').classList.contains('hidden')) updateStateUI();
+});
+$('assistSearch').addEventListener('input', () => {
+  if (!over && !busy && !aiMode() && E) renderAssist(E.legalMoves(words));
+});
+
+$('startBtn').addEventListener('click', startNewMatch);
+$('againBtn').addEventListener('click', startNewMatch);
+$('backSetupBtn').addEventListener('click', () => {
   $('setupCard').classList.remove('hidden');
   $('gameCard').classList.add('hidden');
 });
-$('giveupBtn').addEventListener('click', () => { if (!over) endGame(false, '投了しました。'); });
+$('giveupBtn').addEventListener('click', () => {
+  if (!over) endGame(false, '投了しました。');
+});
 $('playBtn').addEventListener('click', playerMove);
-$('wordInput').addEventListener('keydown', e => { if (e.key === 'Enter') playerMove(); });
-
-// ---------- 設定：環境変数の状態を確認 ----------
-$('log').dataset.empty = '1';
-(async () => {
+$('wordInput').addEventListener('input', clearInlineError);
+$('wordInput').addEventListener('keydown', e => {
+  // 日本語・中国語IME変換確定のEnter誤送信を防止
+  if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) {
+    e.preventDefault();
+    playerMove();
+  }
+});
+$('retryAiBtn').addEventListener('click', () => {
+  if (typeof pendingAiRetry === 'function') {
+    const fn = pendingAiRetry;
+    clearInlineError();
+    fn();
+  }
+});
+$('copyBtn').addEventListener('click', async () => {
+  const text = words.join('');
+  if (!text) return;
   try {
-    const r = await fetch('/api/chat');
+    await navigator.clipboard.writeText(text);
+    const old = $('copyBtn').textContent;
+    $('copyBtn').textContent = 'コピー済み';
+    setTimeout(() => { $('copyBtn').textContent = old; }, 1200);
+  } catch (_) {}
+});
+$('clearLogBtn').addEventListener('click', () => {
+  const el = $('log');
+  el.innerHTML = '<div>ログを消去しました。</div>';
+  el.dataset.empty = '1';
+});
+
+$('openDictSetupBtn').addEventListener('click', openDictModal);
+$('openDictGameBtn').addEventListener('click', openDictModal);
+$('closeDictBtn').addEventListener('click', closeDictModal);
+$('dictModal').addEventListener('click', e => {
+  if (e.target === $('dictModal')) closeDictModal();
+});
+$('dictSearch').addEventListener('input', e => renderDictionary(e.target.value));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('dictModal').classList.contains('hidden')) closeDictModal();
+});
+
+// ---------- Bootstrap ----------
+(function bootstrapSync() {
+  renderStats();
+  $('log').dataset.empty = '1';
+  E = window.GrameEngine.createEngine($('lexicon-csv').textContent);
+  $('lexCountSpan').textContent = String(E.wordCount);
+})();
+
+(async function initAsync() {
+  try {
+    const r = await fetch('./lexicon.csv', { cache: 'no-cache' });
+    if (r.ok) {
+      const fetched = await r.text();
+      if (fetched && fetched.includes('word,')) {
+        E = window.GrameEngine.createEngine(fetched);
+        $('lexCountSpan').textContent = String(E.wordCount);
+      }
+    }
+  } catch (_) { /* file:// の場合は埋め込みCSVをそのまま使用 */ }
+
+  try {
+    const r = await fetch('/api/chat', { cache: 'no-store' });
     if (r.ok) envAI = await r.json();
-  } catch (e) { /* ローカルファイル等では /api/chat が無いので文法モードのまま */ }
+  } catch (_) {}
+
   if (envAI.configured) {
-    $('modeChip').textContent = 'AI対戦モード（環境変数）';
-    $('modeChip').classList.remove('local');
-    $('envStatus').textContent = `AI対戦モード利用可：モデル ${envAI.model}（${envAI.base}）。キーはサーバーの環境変数で管理されています。`;
+    $('aiModeSegBtn').disabled = false;
+    $('aiModeSegBtn').textContent = 'AI対戦モード（有効）';
+    selectedMode = 'ai';
+    document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x.dataset.mode === 'ai'));
+    $('envStatus').textContent = `AI対戦モード利用可：モデル ${envAI.model}（${envAI.base}）。文法モードへ切り替えて遊ぶこともできます。`;
   } else {
     $('envStatus').textContent = '環境変数 GRAME_API_KEY が未設定のため、文法モードで動作中です。';
   }
+  updateModeChip();
 })();
 </script>
 </body>
