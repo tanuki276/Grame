@@ -137,7 +137,7 @@
       <span class="modechip local" id="modeChip">文法モード（オフライン判定）</span>
     </div>
     <p class="note">ルール：交互に文末へ1単語を追加。自分の手で文法が破綻したら負け。文を完成させて相手が続けられなくなったら勝ち。<br>
-    判定は2通り。キー未設定なら<b>文法モード</b>：内蔵辞書（約330語）と文法ルールで判定するので、決まった例文に縛られず語彙の範囲で自由に作れる。APIキーを設定すると<b>AI対戦モード</b>：判定も相手の手もAIが担う。</p>
+    判定は2通り。既定は<b>文法モード</b>：CSV辞書（約350語）と文法ルールで判定するので、決まった例文に縛られず語彙の範囲で自由に作れる。サーバーの環境変数にAPIキーが設定されていれば<b>AI対戦モード</b>：判定も相手の手もAIが担う。</p>
   </div>
 
   <div class="card hidden" id="gameCard">
@@ -163,64 +163,404 @@
   </div>
 
   <details class="card">
-    <summary>AI設定（APIキー）<span>▾</span></summary>
-    <label class="flabel">プロバイダ（プリセット）</label>
-    <select id="preset">
-      <option value="groq">Groq（無料枠・推奨）</option>
-      <option value="gemini">Gemini（無料枠は小さめ）</option>
-      <option value="deepseek">DeepSeek（従量課金）</option>
-      <option value="custom">カスタム</option>
-    </select>
-    <label class="flabel">エンドポイント（OpenAI互換）</label>
-    <input type="text" id="endpoint" value="https://api.groq.com/openai/v1">
-    <label class="flabel">モデル</label>
-    <input type="text" id="model" value="qwen/qwen3.8-27b">
-    <label class="flabel">APIキー（この端末のブラウザ内にだけ保存）</label>
-    <input type="password" id="apiKey" placeholder="sk-... など">
-    <div class="row-btns">
-      <button class="btn-gold" id="saveKeyBtn">キーを保存</button>
-      <button class="btn-text" id="clearKeyBtn">キーを消す</button>
-    </div>
-    <p class="note">キーを保存するとAI対戦モード（相手の手も文法判定もAI）。キー未設定の場合は文法モード（内蔵辞書＋文法ルールで判定するオフライン対戦）。<br>
-    Groq：無料枠の目安は1日1,000リクエスト／200Kトークンで、このゲームなら1日25試合以上は回る計算。中国語の強い Qwen3.8 27B が無料枠にいます。<br>
-    Gemini：無料枠はモデルごとに1日20リクエスト程度という情報があり、数試合で上限に当たる可能性があります。<br>
-    キーは各プロバイダのサイトで無料発行できます（Groq は groq.com のコンソール）。</p>
+    <summary>AI設定（環境変数）<span>▾</span></summary>
+    <p class="note" id="envStatus">状態を確認中…</p>
+    <p class="note">AI対戦モードのAPIキーはブラウザには置かず、サーバーの<b>環境変数</b>で管理します（Vercel の Project → Settings → Environment Variables）。<br>
+    ・<b>GRAME_API_KEY</b>（必須）：Groq などの OpenAI 互換 API キー。Groq は groq.com のコンソールで無料発行でき、無料枠の目安は1日1,000リクエスト／200Kトークン（このゲームなら1日25試合以上）。<br>
+    ・<b>GRAME_API_BASE</b>（任意）：既定は Groq のエンドポイント。<br>
+    ・<b>GRAME_MODEL</b>（任意）：既定は qwen/qwen3.8-27b。<br>
+    環境変数を設定したら Vercel で再デプロイすると有効になります。未設定の間は文法モード（CSV辞書＋文法ルールで判定するオフライン対戦）で動作します。</p>
   </details>
   <div class="fret" style="margin-top:22px"></div>
 </div>
 
+<script type="text/plain" id="lexicon-csv">word,tags
+我,PRON
+你,PRON
+他,PRON
+她,PRON
+它,PRON
+我们,PRON
+你们,PRON
+他们,PRON
+谁,PRON
+自己,PRON
+大家,PRON
+这,PRON|DEM
+那,PRON|DEM
+什么,PRON|DEM
+今天,TIME
+明天,TIME
+昨天,TIME
+现在,TIME
+早上,TIME
+上午,TIME
+中午,TIME
+下午,TIME
+晚上,TIME
+今年,TIME
+明年,TIME
+去年,TIME
+周末,TIME
+平时,TIME
+一,NUM
+二,NUM
+三,NUM
+四,NUM
+五,NUM
+六,NUM
+七,NUM
+八,NUM
+九,NUM
+十,NUM
+两,NUM
+百,NUM
+千,NUM
+个,MW
+只,MW
+本,MW
+张,MW
+条,MW
+件,MW
+杯,MW
+瓶,MW
+碗,MW
+块,MW
+位,MW
+些,MW
+朵,MW
+双,MW
+对,MW|PREP
+岁,MW
+人,NOUN
+学生,NOUN
+老师,NOUN
+朋友,NOUN
+同学,NOUN
+医生,NOUN
+护士,NOUN
+作家,NOUN
+画家,NOUN
+司机,NOUN
+孩子,NOUN
+妈妈,NOUN
+爸爸,NOUN
+哥哥,NOUN
+姐姐,NOUN
+弟弟,NOUN
+妹妹,NOUN
+爷爷,NOUN
+奶奶,NOUN
+猫,NOUN
+狗,NOUN
+鸟,NOUN
+鱼,NOUN
+马,NOUN
+兔子,NOUN
+熊猫,NOUN
+书,NOUN
+本子,NOUN
+笔,NOUN
+纸,NOUN
+手机,NOUN
+电脑,NOUN
+电视,NOUN
+电影,NOUN
+音乐,NOUN
+照片,NOUN
+画儿,NOUN
+水,NOUN
+茶,NOUN
+咖啡,NOUN
+牛奶,NOUN
+啤酒,NOUN
+果汁,NOUN
+饭,NOUN
+菜,NOUN
+面包,NOUN
+苹果,NOUN
+香蕉,NOUN
+橘子,NOUN
+西瓜,NOUN
+草莓,NOUN
+葡萄,NOUN
+米饭,NOUN
+面条,NOUN
+蛋糕,NOUN
+糖,NOUN
+巧克力,NOUN
+钱,NOUN
+车,NOUN
+自行车,NOUN
+汽车,NOUN
+飞机,NOUN
+火车,NOUN
+船,NOUN
+学校,NOUN
+医院,NOUN
+商店,NOUN
+饭店,NOUN
+银行,NOUN
+公园,NOUN
+家,NOUN
+房间,NOUN
+厨房,NOUN
+桌子,NOUN
+椅子,NOUN
+门,NOUN
+窗户,NOUN
+床,NOUN
+衣服,NOUN
+裤子,NOUN
+鞋,NOUN
+帽子,NOUN
+裙子,NOUN
+中国,NOUN
+日本,NOUN
+美国,NOUN
+英国,NOUN
+法国,NOUN
+德国,NOUN
+韩国,NOUN
+北京,NOUN
+上海,NOUN
+东京,NOUN
+汉语,NOUN
+中文,NOUN
+英语,NOUN
+日语,NOUN
+韩语,NOUN
+汉字,NOUN
+词,NOUN
+生词,NOUN
+问题,NOUN
+礼物,NOUN
+花,NOUN
+雨,NOUN
+雪,NOUN
+云,NOUN
+天气,NOUN
+颜色,NOUN
+红色,NOUN
+白色,NOUN
+黑色,NOUN
+歌,NOUN
+电影票,NOUN
+东西,NOUN
+地方,NOUN
+时间,NOUN
+名字,NOUN
+工作,NOUN|VI|VT
+学习,NOUN|VI|VT
+吃,VT
+喝,VT
+买,VT
+卖,VT
+看,VT
+读,VT|VI
+写,VT|VI
+喜欢,VT|VC
+爱,VT|VC
+做,VT
+听,VT
+唱,VT|VI
+开,VT
+关,VT
+找,VT
+送,VT
+问,VT
+教,VT
+告诉,VT
+知道,VT
+认识,VT
+觉得,VT
+给,VT|PREP
+打,VT
+借,VT
+等,VT
+帮,VT
+穿,VT
+脱,VT
+种,VT
+养,VT
+画,VT|VI
+访问,VT
+参观,VT
+看见,VT
+听见,VT
+找到,VT
+希望,VT|VC
+需要,VT|VC
+来,VI
+去,VI
+走,VI
+跑,VI
+笑,VI
+哭,VI
+睡,VI
+住,VI
+回,VI
+休息,VI
+生病,VI
+站,VI
+坐,VI
+游泳,VI
+毕业,VI
+见面,VI
+睡觉,VI
+吃饭,VI
+说话,VI
+下雨,VI
+上班,VI
+下班,VI
+起床,VI
+说,VT|VI
+学,VT|VI
+是,SHI
+有,YOU
+没有,YOU|ADV
+想,MODAL
+要,MODAL
+会,MODAL
+能,MODAL
+可以,MODAL
+应该,MODAL
+打算,MODAL
+愿意,MODAL
+不,ADV
+没,ADV
+也,ADV
+都,ADV
+还,ADV
+再,ADV
+又,ADV
+很,ADV
+真,ADV
+非常,ADV
+太,ADV
+已经,ADV
+正在,ADV
+刚,ADV
+常常,ADV
+有时,ADV
+一起,ADV
+就,ADV
+才,ADV
+先,ADV
+其实,ADV
+大概,ADV
+特别,ADV
+快,ADV|ADJ
+慢,ADV|ADJ
+好,ADV|ADJ
+在,PREP
+跟,PREP
+从,PREP
+到,PREP
+为,PREP
+比,PREP
+向,PREP
+大,ADJ
+小,ADJ
+坏,ADJ
+新,ADJ
+旧,ADJ
+长,ADJ
+短,ADJ
+高,ADJ
+矮,ADJ
+胖,ADJ
+瘦,ADJ
+忙,ADJ
+累,ADJ
+困,ADJ
+饿,ADJ
+渴,ADJ
+贵,ADJ
+便宜,ADJ
+漂亮,ADJ
+好吃,ADJ
+好喝,ADJ
+好看,ADJ
+好听,ADJ
+好玩,ADJ
+热,ADJ
+冷,ADJ
+远,ADJ
+近,ADJ
+多,ADJ
+少,ADJ
+早,ADJ
+晚,ADJ
+难,ADJ
+容易,ADJ
+有意思,ADJ
+没意思,ADJ
+高兴,ADJ
+开心,ADJ
+生气,ADJ
+安静,ADJ
+着急,ADJ
+聪明,ADJ
+努力,ADJ
+健康,ADJ
+安全,ADJ
+重要,ADJ
+认真,ADJ
+舒服,ADJ
+干净,ADJ
+可爱,ADJ
+有名,ADJ
+辛苦,ADJ
+简单,ADJ
+的,DE
+了,LE
+吗,FP
+呢,FP
+吧,FP
+啊,FP
+呀,FP
+和,CONJ
+但是,CONJ
+然后,CONJ
+因为,CONJ
+所以,CONJ
+而且,CONJ
+如果,CONJ
+虽然,CONJ</script>
 <script id="grame-engine">
 'use strict';
 /* Grame 文法エンジン: 内蔵辞書(品詞タグ付き)+有限状態文法で判定する。
    コーパスの文そのものには縛られない。辞書に語を足せば語彙が増える。 */
 
-// ---------- 辞書: 語 -> 品詞タグ配列 ----------
+// ---------- 辞書: lexicon.csv (word,tags) を読む ----------
 // PRON 代詞 / DEM 指示 / NOUN 名詞 / TIME 時間詞 / NUM 数詞 / MW 量詞
 // VT 他動詞 / VI 自動詞 / SHI 是 / YOU 有 / MODAL 助動詞 / ADV 副詞
 // PREP 介詞 / ADJ 形容詞 / DE 的 / LE 了 / FP 語気助詞 / CONJ 接続詞
-const LEXICON = {};
-function addWords(tags, words) { for (const w of words.split(' ')) { if (!w) continue; (LEXICON[w] = LEXICON[w] || []).push(...tags); } }
-
-addWords(['PRON'], '我 你 他 她 它 我们 你们 他们 谁 自己 大家 这 那 什么');
-addWords(['DEM'], '这 那 什么');
-addWords(['TIME'], '今天 明天 昨天 现在 早上 上午 中午 下午 晚上 今年 明年 去年 周末 平时');
-addWords(['NUM'], '一 二 三 四 五 六 七 八 九 十 两 百 千');
-addWords(['MW'], '个 只 本 张 条 件 杯 瓶 碗 块 位 些 朵 双 对 岁');
-addWords(['NOUN'], '人 学生 老师 朋友 同学 医生 护士 作家 画家 司机 孩子 妈妈 爸爸 哥哥 姐姐 弟弟 妹妹 爷爷 奶奶 猫 狗 鸟 鱼 马 兔子 熊猫 书 本子 笔 纸 手机 电脑 电视 电影 音乐 照片 画儿 水 茶 咖啡 牛奶 啤酒 果汁 饭 菜 面包 苹果 香蕉 橘子 西瓜 草莓 葡萄 米饭 面条 蛋糕 糖 巧克力 钱 车 自行车 汽车 飞机 火车 船 学校 医院 商店 饭店 银行 公园 家 房间 厨房 桌子 椅子 门 窗户 床 衣服 裤子 鞋 帽子 裙子 中国 日本 美国 英国 法国 德国 韩国 北京 上海 东京 汉语 中文 英语 日语 韩语 汉字 词 生词 问题 礼物 花 雨 雪 云 天气 颜色 红色 白色 黑色 歌 电影票 东西 地方 时间 名字');
-addWords(['NOUN', 'VI'], '工作 学习');
-addWords(['VT'], '吃 喝 买 卖 看 读 写 喜欢 爱 做 听 唱 开 关 找 送 问 教 告诉 知道 认识 觉得 给 打 借 等 帮 穿 脱 种 养 画 访问 参观 看见 听见 找到 希望 需要');
-addWords(['VI'], '来 去 走 跑 笑 哭 睡 住 回 休息 生病 站 坐 游泳 毕业 见面 睡觉 吃饭 说话 下雨 上班 下班 起床');
-addWords(['VT', 'VI'], '学习 工作 说 唱 读 写 画 学');
-addWords(['SHI'], '是');
-addWords(['YOU'], '有 没有');
-addWords(['MODAL'], '想 要 会 能 可以 应该 打算 愿意');
-addWords(['ADV'], '不 没 也 都 还 再 又 很 真 非常 太 已经 正在 刚 常常 有时 一起 就 才 先 其实 大概 特别 快 慢 好');
-addWords(['PREP'], '在 跟 给 从 到 对 为 比 向');
-addWords(['ADJ'], '大 小 好 坏 新 旧 长 短 高 矮 胖 瘦 忙 累 困 饿 渴 贵 便宜 漂亮 好吃 好喝 好看 好听 好玩 热 冷 远 近 多 少 快 慢 早 晚 难 容易 有意思 没意思 高兴 开心 生气 安静 着急 聪明 努力 健康 安全 重要 认真 舒服 干净 可爱 有名 辛苦 简单');
-addWords(['DE'], '的');
-addWords(['LE'], '了');
-addWords(['FP'], '吗 呢 吧 啊 呀');
-addWords(['CONJ'], '和 但是 然后 因为 所以 而且 如果 虽然');
+function parseLexicon(csv) {
+  const lex = {};
+  for (const line of String(csv).split(/\r?\n/)) {
+    const t = line.trim();
+    if (!t || t.startsWith('#') || t === 'word,tags') continue;
+    const i = t.indexOf(',');
+    if (i < 0) continue;
+    const w = t.slice(0, i).trim();
+    const tags = t.slice(i + 1).split('|').map(s => s.trim()).filter(Boolean);
+    if (w && tags.length) lex[w] = tags;
+  }
+  return lex;
+}
+function loadLexiconCsv() {
+  if (typeof document !== 'undefined') {
+    const el = document.getElementById('lexicon-csv');
+    if (el) return el.textContent;
+  }
+  if (typeof require !== 'undefined') {
+    try { return require('fs').readFileSync(require('path').join(__dirname, 'lexicon.csv'), 'utf-8'); } catch (e) {}
+  }
+  return '';
+}
+const LEXICON = parseLexicon(loadLexiconCsv());
 
 // ---------- 文法 (NFA) ----------
 const ACCEPTING = new Set(['COMPLETE', 'COMPLETE2', 'FINAL', 'VI']);
@@ -265,12 +605,12 @@ function buildTransitions() {
   const predOuter = {
     ADV: ['PRED'], MODAL: ['VZONE'],
     SHI: ['O0'], YOU: ['O0'],
-    VT: ['VT'], VI: ['VI'], ADJ: ['COMPLETE'],
+    VT: ['VT'], VC: ['VC'], VI: ['VI'], ADJ: ['COMPLETE'],
   };
   const subjOuter = {
     TIME: ['SUBJ'], ADV: ['PRED'], MODAL: ['VZONE'],
     SHI: ['O0'], YOU: ['O0'], PREP: ['P0'],
-    VT: ['VT'], VI: ['VI'], ADJ: ['COMPLETE'],
+    VT: ['VT'], VC: ['VC'], VI: ['VI'], ADJ: ['COMPLETE'],
   };
 
   buildNP('S', subjOuter, false, T);
@@ -288,6 +628,7 @@ function buildTransitions() {
   for (const [tag, n] of Object.entries(predOuter)) put('PRED', tag, n);
   // 助動詞の後
   put('VZONE', 'VT', 'VT'); put('VZONE', 'VI', 'VI');
+  put('VZONE', 'VC', 'VC');
   put('VZONE', 'SHI', 'O0'); put('VZONE', 'ADV', 'VZONE');
   // 他動詞の後: 目的語か了。介詞句を挟むのも許可(緩め)
   put('VT', 'LE', 'COMPLETE');
@@ -299,6 +640,9 @@ function buildTransitions() {
   // 節の接続後: 主語あり/なし両対応
   copyInto('CLAUSE', 'START');
   for (const [tag, n] of Object.entries(predOuter)) put('CLAUSE', tag, n);
+  // 動詞句・節を取る動詞の後(喜欢/爱/希望/需要): 名詞目的語・動詞句・節のどれも可
+  copyInto('VC', 'O0');
+  copyInto('VC', 'CLAUSE');
   // 完成後の了は一度だけ
   for (const [tag, n] of Object.entries(completeOuter)) if (tag !== 'LE') put('COMPLETE2', tag, n);
   // COMPLETE 自体の遷移(completeOuter + 後置の在/到)
@@ -411,24 +755,13 @@ if (typeof window !== 'undefined') window.GrameEngine = GrameEngine;
 const $ = id => document.getElementById(id);
 const E = window.GrameEngine;
 
-const PRESETS = {
-  groq:     { endpoint: 'https://api.groq.com/openai/v1', model: 'qwen/qwen3.8-27b' },
-  gemini:   { endpoint: 'https://generativelanguage.googleapis.com/v1beta/openai/', model: 'gemini-4-hydrogen' },
-  deepseek: { endpoint: 'https://api.deepseek.com', model: 'deepseek-flash' },
-};
 let order = 'first';
 let words = [];       // 現在の語列
 let over = false;
 let busy = false;
+let envAI = { configured: false, model: '', base: '' };  // /api/chat の環境変数状態
 
-function cfg() {
-  return {
-    endpoint: $('endpoint').value.trim().replace(/\/+$/, ''),
-    model: $('model').value.trim(),
-    key: localStorage.getItem('cnBattleKey') || '',
-  };
-}
-function aiMode() { return !!cfg().key; }
+function aiMode() { return envAI.configured; }
 
 function log(html) {
   const el = $('log');
@@ -502,11 +835,11 @@ const JUDGE_SYSTEM = `あなたは中国語の文法審判です。プレイヤ�
 const MOVE_SYSTEM = `あなたは中国語の造句対戦ゲームのプレイヤーです。現在の単語列の末尾に、文法的に正しく続く中国語の単語を1つだけ追加してください。文を完成させて相手が続けられなくなるのが理想です。単語のみを出力してください（句読点・説明・引用符は禁止）。`;
 
 async function callAI(system, user) {
-  const c = cfg();
-  const res = await fetch(c.endpoint + '/chat/completions', {
+  // APIキーはサーバーの環境変数側。ブラウザは同一オリジンのプロキシだけを叩く。
+  const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + c.key },
-    body: JSON.stringify({ model: c.model, temperature: 0.3, messages: [
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ temperature: 0.3, messages: [
       { role: 'system', content: system }, { role: 'user', content: user } ] }),
   });
   if (!res.ok) throw new Error('APIエラー: ' + res.status);
@@ -593,21 +926,21 @@ $('giveupBtn').addEventListener('click', () => { if (!over) endGame(false, '投�
 $('playBtn').addEventListener('click', playerMove);
 $('wordInput').addEventListener('keydown', e => { if (e.key === 'Enter') playerMove(); });
 
-// ---------- 設定 ----------
-$('preset').addEventListener('change', () => {
-  const p = PRESETS[$('preset').value];
-  if (p) { $('endpoint').value = p.endpoint; $('model').value = p.model; }
-});
-$('saveKeyBtn').addEventListener('click', () => {
-  const k = $('apiKey').value.trim();
-  if (k) { localStorage.setItem('cnBattleKey', k); $('modeChip').textContent = 'AI対戦モード'; alert('キーを保存しました。AI対戦モードになります。'); }
-});
-$('clearKeyBtn').addEventListener('click', () => {
-  localStorage.removeItem('cnBattleKey'); $('apiKey').value = '';
-  $('modeChip').textContent = '文法モード（オフライン判定）'; alert('キーを消しました。文法モードになります。');
-});
+// ---------- 設定：環境変数の状態を確認 ----------
 $('log').dataset.empty = '1';
-if (localStorage.getItem('cnBattleKey')) $('modeChip').textContent = 'AI対戦モード';
+(async () => {
+  try {
+    const r = await fetch('/api/chat');
+    if (r.ok) envAI = await r.json();
+  } catch (e) { /* ローカルファイル等では /api/chat が無いので文法モードのまま */ }
+  if (envAI.configured) {
+    $('modeChip').textContent = 'AI対戦モード（環境変数）';
+    $('modeChip').classList.remove('local');
+    $('envStatus').textContent = `AI対戦モード利用可：モデル ${envAI.model}（${envAI.base}）。キーはサーバーの環境変数で管理されています。`;
+  } else {
+    $('envStatus').textContent = '環境変数 GRAME_API_KEY が未設定のため、文法モードで動作中です。';
+  }
+})();
 </script>
 </body>
 </html>
