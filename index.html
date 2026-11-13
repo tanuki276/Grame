@@ -220,20 +220,8 @@
       <button type="button" data-order="second">後攻（AIから）</button>
     </div>
 
-    <label class="flabel">判定モード</label>
-    <div class="seg" id="modeSeg">
-      <button type="button" data-mode="local" class="on">文法モード（オフライン）</button>
-      <button type="button" data-mode="ai" id="aiModeSegBtn" disabled>AI対戦モード（未設定）</button>
-    </div>
-
-    <label class="toggle-row">
-      <span>文法モードで入力候補ヒントを表示する（タップ入力可）</span>
-      <input type="checkbox" id="assistToggle" checked>
-    </label>
-
     <div class="row-btns">
       <button class="btn-filled" id="startBtn">対戦開始</button>
-      <span class="modechip local" id="modeChip">文法モード（オフライン判定）</span>
     </div>
 
     <p class="note">
@@ -250,16 +238,13 @@
     <div class="turnbar">
       <div class="turn-left">
         <span class="turnchip" id="turnChip">あなたの番</span>
-        <span class="state-pill" id="sentenceStatePill">文頭</span>
       </div>
       <div style="display:flex; gap:6px; align-items:center">
-        <button type="button" class="btn-outline btn-sm" id="copyBtn">コピー</button>
         <button type="button" class="btn-outline btn-sm" id="openDictGameBtn">辞書</button>
       </div>
     </div>
 
     <div class="sentence" id="sentence"><span class="empty-hint">最初の1単語を入力してください</span></div>
-    <div class="slot-hint" id="slotHint"></div>
 
     <div class="playrow" id="playRow">
       <input type="text" id="wordInput" placeholder="1単語（例：我）" maxlength="6" autocomplete="off">
@@ -271,15 +256,6 @@
       <button type="button" class="btn-outline btn-sm hidden" id="retryAiBtn">再試行</button>
     </div>
 
-    <div class="assist-box hidden" id="assistBox">
-      <div class="assist-top">
-        <span class="assist-title" id="assistTitle">入力できる候補語</span>
-        <input type="search" id="assistSearch" placeholder="候補を絞り込み…" style="width:160px; padding:5px 10px; font-size:12px; border-radius:999px">
-      </div>
-      <div class="cat-tabs" id="assistTabs"></div>
-      <div class="chips" id="assistChips"></div>
-    </div>
-
     <div class="result" id="resultBox"></div>
     <div class="row-btns">
       <button class="btn-tonal hidden" id="againBtn">もう一試合</button>
@@ -288,25 +264,6 @@
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-head">
-      <h2>進行ログ</h2>
-      <button type="button" class="btn-text btn-sm" id="clearLogBtn">ログ消去</button>
-    </div>
-    <div class="log" id="log"><div>まだ対戦が始まっていません。</div></div>
-  </div>
-
-  <details class="card">
-    <summary>AI設定・システム情報<span>▾</span></summary>
-    <p class="note" id="envStatus">状態を確認中…</p>
-    <p class="note">
-      AI対戦モードのAPIキーはブラウザには置かず、サーバーの<b>環境変数</b>で管理します（Vercel の Project → Settings → Environment Variables）。<br>
-      ・<b>GRAME_API_KEY</b>（必須）：Groq などの OpenAI 互換 API キー。<br>
-      ・<b>GRAME_API_BASE</b>（任意）：既定は Groq のエンドポイント。<br>
-      ・<b>GRAME_MODEL</b>（任意）：既定は <code>qwen/qwen3.8-27b</code>。<br>
-      未設定の間は文法モード（CSV辞書＋NFA文法エンジンによるオフライン対戦）で動作します。
-    </p>
-  </details>
   <div class="fret" style="margin-top:22px"></div>
 </div>
 
@@ -719,12 +676,10 @@ const STATS_KEY = 'grame_stats_v1';
 let stats = loadStats();
 let E = null;
 let order = 'first';
-let selectedMode = 'local'; // 'local' | 'ai'
 let envAI = { configured: false, model: '', base: '' };
 let words = [];
 let over = false;
 let busy = false;
-let activeAssistCat = 'all';
 let pendingAiRetry = null;
 
 function loadStats() {
@@ -754,7 +709,7 @@ function renderStats() {
 }
 
 function aiMode() {
-  return selectedMode === 'ai' && envAI.configured;
+  return !!envAI.configured;
 }
 
 function clearInlineError() {
@@ -776,22 +731,7 @@ function showInlineError(msg, retryFn) {
   $('inlineErr').classList.add('show');
 }
 
-function appendLog(prefixBold, text) {
-  const el = $('log');
-  if (el.dataset.empty) {
-    el.innerHTML = '';
-    delete el.dataset.empty;
-  }
-  const row = document.createElement('div');
-  if (prefixBold) {
-    const b = document.createElement('b');
-    b.textContent = prefixBold;
-    row.appendChild(b);
-  }
-  row.appendChild(document.createTextNode(text));
-  el.appendChild(row);
-  el.scrollTop = el.scrollHeight;
-}
+function appendLog(prefixBold, text) { /* ログ表示は廃止（HUD簡素化）。呼び出し互換のため空関数として残置 */ }
 
 function renderSentence() {
   const s = $('sentence');
@@ -830,129 +770,9 @@ function renderSentence() {
   });
 }
 
-function updateStateUI() {
-  const pill = $('sentenceStatePill');
-  const hintEl = $('slotHint');
+function updateStateUI() { /* 状態ピル・候補ヒント表示は廃止（HUD簡素化） */ }
 
-  if (over) {
-    pill.textContent = '決着';
-    pill.className = 'state-pill';
-    hintEl.textContent = '';
-    $('assistBox').classList.add('hidden');
-    return;
-  }
 
-  if (aiMode()) {
-    pill.textContent = words.length ? `${words.length}語` : '文頭';
-    pill.className = 'state-pill';
-    hintEl.textContent = words.length ? 'AI対戦モード：自由な中国語単語（漢字1〜5文字）で続けられます' : '最初の1単語を入力してください';
-    $('assistBox').classList.add('hidden');
-    return;
-  }
-
-  const st = E.analyze(words);
-  if (!st.valid) {
-    pill.textContent = '破綻';
-    pill.className = 'state-pill';
-    hintEl.textContent = '';
-    $('assistBox').classList.add('hidden');
-    return;
-  }
-
-  if (!words.length) {
-    pill.textContent = '文頭';
-    pill.className = 'state-pill';
-  } else if (st.complete) {
-    pill.textContent = `完成（${words.length}語）`;
-    pill.className = 'state-pill complete';
-  } else {
-    pill.textContent = `途中（${words.length}語）`;
-    pill.className = 'state-pill';
-  }
-
-  const moves = E.legalMoves(words);
-  hintEl.textContent = moves.length
-    ? `次の目安：${st.hint}（続けられる語：${moves.length}語）`
-    : '続けられる語がありません';
-
-  const mineTurn = !busy && !$('playBtn').disabled;
-  if ($('assistToggle').checked && mineTurn && moves.length) {
-    renderAssist(moves);
-    $('assistBox').classList.remove('hidden');
-  } else {
-    $('assistBox').classList.add('hidden');
-  }
-}
-
-function renderAssist(moves) {
-  const tabsEl = $('assistTabs');
-  const chipsEl = $('assistChips');
-  const query = $('assistSearch').value.trim();
-
-  const catBuckets = new Map();
-  for (const m of moves) {
-    const cat = E.getCategoryForWord(m.word);
-    if (!catBuckets.has(cat.id)) catBuckets.set(cat.id, { id: cat.id, label: cat.label, items: [] });
-    catBuckets.get(cat.id).items.push(m);
-  }
-
-  if (activeAssistCat !== 'all' && !catBuckets.has(activeAssistCat)) {
-    activeAssistCat = 'all';
-  }
-
-  tabsEl.innerHTML = '';
-  const allBtn = document.createElement('button');
-  allBtn.type = 'button';
-  allBtn.className = 'cat-tab' + (activeAssistCat === 'all' ? ' on' : '');
-  allBtn.textContent = `すべて (${moves.length})`;
-  allBtn.addEventListener('click', () => { activeAssistCat = 'all'; renderAssist(moves); });
-  tabsEl.appendChild(allBtn);
-
-  for (const group of catBuckets.values()) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'cat-tab' + (activeAssistCat === group.id ? ' on' : '');
-    b.textContent = `${group.label} (${group.items.length})`;
-    b.addEventListener('click', () => { activeAssistCat = group.id; renderAssist(moves); });
-    tabsEl.appendChild(b);
-  }
-
-  let filtered = activeAssistCat === 'all' ? moves : (catBuckets.get(activeAssistCat)?.items || []);
-  if (query) filtered = filtered.filter(m => m.word.includes(query));
-
-  chipsEl.innerHTML = '';
-  const maxShow = 80;
-  const shown = filtered.slice(0, maxShow);
-
-  if (!shown.length) {
-    const empty = document.createElement('span');
-    empty.className = 'empty-hint';
-    empty.textContent = '該当する候補がありません';
-    chipsEl.appendChild(empty);
-    return;
-  }
-
-  for (const m of shown) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chip' + (m.complete && !m.extendable ? ' win-chip' : '');
-    btn.textContent = m.word;
-    btn.title = m.complete && !m.extendable ? 'この手で文が完成し勝利' : (m.complete ? '文が完成する手' : '文を続ける手');
-    btn.addEventListener('click', () => {
-      $('wordInput').value = m.word;
-      playerMove();
-    });
-    chipsEl.appendChild(btn);
-  }
-
-  if (filtered.length > maxShow) {
-    const more = document.createElement('span');
-    more.className = 'empty-hint';
-    more.style.alignSelf = 'center';
-    more.textContent = `他 ${filtered.length - maxShow} 語（検索で絞り込み）`;
-    chipsEl.appendChild(more);
-  }
-}
 
 function setTurn(mine) {
   const c = $('turnChip');
@@ -992,7 +812,6 @@ function endGame(win, text) {
   $('backSetupBtn').classList.remove('hidden');
   $('playRow').classList.add('hidden');
   $('giveupBtn').classList.add('hidden');
-  $('assistBox').classList.add('hidden');
   setTurn(false);
   appendLog('決着：', `${win ? 'あなたの勝ち' : 'あなたの負け'}。${text}`);
 }
@@ -1192,7 +1011,6 @@ async function playerMove() {
     return;
   }
   input.value = '';
-  $('assistSearch').value = '';
   await submitPlayerWord(w);
 }
 
@@ -1200,7 +1018,6 @@ function startNewMatch() {
   words = [];
   over = false;
   busy = false;
-  activeAssistCat = 'all';
   clearInlineError();
 
   $('setupCard').classList.add('hidden');
@@ -1211,10 +1028,6 @@ function startNewMatch() {
   $('backSetupBtn').classList.add('hidden');
   $('playRow').classList.remove('hidden');
   $('giveupBtn').classList.remove('hidden');
-
-  const logEl = $('log');
-  logEl.innerHTML = '';
-  logEl.dataset.empty = '1';
 
   renderSentence();
   appendLog('対戦開始：', `${order === 'first' ? '先行（あなた）' : '後攻（AI）'}・${aiMode() ? 'AI対戦モード' : '文法モード'}`);
@@ -1307,31 +1120,9 @@ $('orderSeg').addEventListener('click', e => {
   document.querySelectorAll('#orderSeg button').forEach(x => x.classList.toggle('on', x === b));
 });
 
-$('modeSeg').addEventListener('click', e => {
-  const b = e.target.closest('button');
-  if (!b || b.disabled) return;
-  selectedMode = b.dataset.mode;
-  document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x === b));
-  updateModeChip();
-});
 
-function updateModeChip() {
-  const chip = $('modeChip');
-  if (aiMode()) {
-    chip.textContent = 'AI対戦モード（環境変数）';
-    chip.classList.remove('local');
-  } else {
-    chip.textContent = '文法モード（オフライン判定）';
-    chip.classList.add('local');
-  }
-}
 
-$('assistToggle').addEventListener('change', () => {
-  if (!$('gameCard').classList.contains('hidden')) updateStateUI();
-});
-$('assistSearch').addEventListener('input', () => {
-  if (!over && !busy && !aiMode() && E) renderAssist(E.legalMoves(words));
-});
+
 
 $('startBtn').addEventListener('click', startNewMatch);
 $('againBtn').addEventListener('click', startNewMatch);
@@ -1358,21 +1149,6 @@ $('retryAiBtn').addEventListener('click', () => {
     fn();
   }
 });
-$('copyBtn').addEventListener('click', async () => {
-  const text = words.join('');
-  if (!text) return;
-  try {
-    await navigator.clipboard.writeText(text);
-    const old = $('copyBtn').textContent;
-    $('copyBtn').textContent = 'コピー済み';
-    setTimeout(() => { $('copyBtn').textContent = old; }, 1200);
-  } catch (_) {}
-});
-$('clearLogBtn').addEventListener('click', () => {
-  const el = $('log');
-  el.innerHTML = '<div>ログを消去しました。</div>';
-  el.dataset.empty = '1';
-});
 
 $('openDictSetupBtn').addEventListener('click', openDictModal);
 $('openDictGameBtn').addEventListener('click', openDictModal);
@@ -1388,7 +1164,6 @@ document.addEventListener('keydown', e => {
 // ---------- Bootstrap ----------
 (function bootstrapSync() {
   renderStats();
-  $('log').dataset.empty = '1';
   E = window.GrameEngine.createEngine($('lexicon-csv').textContent);
   $('lexCountSpan').textContent = String(E.wordCount);
 })();
@@ -1410,16 +1185,7 @@ document.addEventListener('keydown', e => {
     if (r.ok) envAI = await r.json();
   } catch (_) {}
 
-  if (envAI.configured) {
-    $('aiModeSegBtn').disabled = false;
-    $('aiModeSegBtn').textContent = 'AI対戦モード（有効）';
-    selectedMode = 'ai';
-    document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x.dataset.mode === 'ai'));
-    $('envStatus').textContent = `AI対戦モード利用可：モデル ${envAI.model}（${envAI.base}）。文法モードへ切り替えて遊ぶこともできます。`;
-  } else {
-    $('envStatus').textContent = '環境変数 GRAME_API_KEY が未設定のため、文法モードで動作中です。';
-  }
-  updateModeChip();
+  // AI対戦モードは環境変数が設定されていれば自動で有効になる（画面に設定UIは出さない）
 })();
 </script>
 </body>
